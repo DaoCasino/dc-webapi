@@ -1,7 +1,7 @@
 {
   "name": "dc-webapi",
   "version": "1.0.0",
-  "main": "index.js",
+  "main": "./lib/index.js",
   "license": "MIT",
   "scripts": {
     "build": "npm-run-all typescript",
@@ -15,7 +15,6 @@
     "dc-configs": "^1.0.0",
     "dc-ethereum-utils": "1.0.0",
     "dc-messaging": "1.0.0",
-    "dc-logging": "^1.0.0",
-    "web3-eth-accounts": "^1.0.0-beta.36"
+    "dc-logging": "^1.0.0"
   }
 }
