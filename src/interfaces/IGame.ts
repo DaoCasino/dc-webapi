@@ -1,13 +1,16 @@
 import {
-  ConnectParams,
-  GameLogicFunction
+  PlayParams,
+  IGameLogic,
+  ConnectParams
 } from 'dc-core'
+import { Eth } from 'dc-ethereum-utils'
+import { AccountInstance } from './IAccount'
 import { ContractInfo } from 'dc-configs'
 
 export interface InitGameParams {
   name: string
-  gameLogicFunction: GameLogicFunction
-  contract: ContractInfo
+  gameLogicFunction: () => IGameLogic
+  contract: ContractInfo,
   rules: any
 }
 
@@ -29,20 +32,21 @@ export interface ConnectResult extends ChannelResult {
   channelBalances: GameBalances
 }
 
+export interface PlayResult {
+  profit: number
+  randomNums: number[]
+  params: PlayParams
+  balances: GameBalances
+}
+
 /** Interface for return disconnect game fucn */
 export interface DisconnectResult extends ChannelResult {
-  playerResultBalance: number
-  dealerResultBalance: number
-  historyGame: any[]
+  resultBalances: GameBalances
 }
 
 /** Interface for user call */
-export interface DAppInstance {
+export interface IGame {
   connect: (params: ConnectParams) => Promise<ConnectResult>
-  play: (
-    bets: number[],
-    gameData: any,
-    randoms: number[][]
-  ) => Promise<any>
+  // play: (params: PlayParams) => Promise<PlayResult>
   disconnect: () => Promise<DisconnectResult>
 }

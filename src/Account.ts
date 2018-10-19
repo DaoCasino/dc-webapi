@@ -7,7 +7,7 @@ const log = new Logger('Account:')
 
 export class Account implements AccountInstance {
   private _Eth: Eth
-  private _address: string
+  address: string
 
   constructor() {
     /** init config params */
@@ -77,8 +77,8 @@ export class Account implements AccountInstance {
     this._Eth.saveWallet(walletPassword, privateKey)
     
     /** Save address */
-    this._address = add0x(this._Eth.getAccount().address)
-    log.info(`Account ${this._address} created`) 
+    this.address = add0x(this._Eth.getAccount().address)
+    log.info(`Account ${this.address} created`) 
   }
 
   getAddress(): string {
@@ -86,8 +86,8 @@ export class Account implements AccountInstance {
      * If localstorage wallet not exist
      * then return local address
      */
-    if (typeof this._address !== 'undefined') {
-      return this._address
+    if (typeof this.address !== 'undefined') {
+      return this.address
     }
     
     /**
