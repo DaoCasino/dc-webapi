@@ -1,4 +1,4 @@
-import { LastBalances } from 'dc-ethereum-utils'
+import { LastBalances, Eth } from 'dc-ethereum-utils'
 
 export interface AccountInstance {
   init: (
@@ -6,6 +6,7 @@ export interface AccountInstance {
     privateKeytoCreate?: string
   ) => void
   getAddress: () => string
+  getEthInstance: () => Eth
   getBalances: (address: string) => Promise<LastBalances>
   exportPrivateKey: (walletPassword: string) => string 
 }

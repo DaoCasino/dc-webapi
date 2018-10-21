@@ -6,24 +6,30 @@ import { AccountInstance } from './interfaces/IAccount'
 const log = new Logger('Account:')
 
 export class Account implements AccountInstance {
-  private _Eth: Eth
+  protected _Eth: Eth
   address: string
 
   constructor() {
     /** init config params */
     const {
+      contracts,
+      walletName,
       gasPrice: price,
       gasLimit: limit,
-      web3HttpProviderUrl: httpProviderUrl,
-      contracts
+      web3HttpProviderUrl: httpProviderUrl
     } = config
 
     /** Init new Eth instance */
     this._Eth = new Eth({
+      walletName,
       httpProviderUrl,
-      ERC20ContractInfo: contracts.ERC20,
-      gasParams: { price, limit }
+      gasParams: { price, limit },
+      ERC20ContractInfo: contracts.ERC20
     })
+  }
+
+  getEthInstance(): Eth {
+    return this._Eth
   }
 
   init(

@@ -1,6 +1,6 @@
 import {
   // PlayParams,
-  DAppFactory,
+  DApp,
   ConnectParams,
   IDAppPlayerInstance
 } from 'dc-core'
@@ -12,24 +12,21 @@ import {
   DisconnectResult
 } from './interfaces/IGame'
 import { Logger } from 'dc-logging'
-import { dec2bet } from 'dc-ethereum-utils'
+import { config } from 'dc-configs'
+import { dec2bet, Eth } from 'dc-ethereum-utils'
 import { IpfsTransportProvider, IMessagingProvider } from "dc-messaging"
 
 const log = new Logger('Game:')
 
 export class Game implements IGame {
+  private _Eth: Eth
   private _params: InitGameParams
-  private _DAppFactory: DAppFactory
   private _GameInstance: IDAppPlayerInstance
 
   constructor(params: InitGameParams) {
     this._params = params
-    this._initMessaging()
-      .then(async messagingProvider => {
-        this._DAppFactory = new DAppFactory(messagingProvider)
-        this._GameInstance = await this._DAppFactory.startClient(this._params)
-        log.info(`Game ${this._params.name} inited!`)
-      })
+    this._Eth = this._params.Account.getEthInstance()
+    log.info(`Game ${this._params.name} created!`)
   }
 
   /** Create and return messaging provider */
@@ -58,6 +55,27 @@ export class Game implements IGame {
     }
   }
 
+  async start(): Promise<void> {
+    const transportProvider = await this._initMessaging()
+    const { platformId, blockchainNetwork } = config
+    const { contract, gameLogicFunction, name, rules } = this._params
+    const dappParams = {
+      slug: name,
+      platformId,
+      blockchainNetwork,
+      contract,
+      rules,
+      roomProvider: transportProvider,
+      gameLogicFunction,
+      Eth: this._Eth
+    }
+
+    const dapp = new DApp(dappParams)
+    this._GameInstance = await dapp.startClient()
+
+    log.info(`Game ready to connect`)
+  }
+
   async connect(params: ConnectParams): Promise<ConnectResult> {
     /** parse deposit and game data of method params */
     const { playerDeposit, gameData } = params
@@ -68,6 +86,7 @@ export class Game implements IGame {
     
     /** Check channel state */
     if (this._getChannelStatus(gameConnect.state) === 'opened') {
+      log.info(`Channel  ${gameConnect.channelId} opened! Go to game!`)
       /** Generate and return data for connected results */
       return {
         channelID: gameConnect.channelId,
