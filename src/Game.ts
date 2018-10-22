@@ -111,8 +111,8 @@ export class Game implements IGame {
   //   return {
   //     params,
   //     profit: callPlayResults.profit,
-  //     balances: callPlayResults.balances,
-  //     randomNums: callPlayResults.random
+  //     balances: this._GameInstance.channelState.getData().balance,
+  //     randomNums: callPlayResults.randoms
   //   }
   // }
 

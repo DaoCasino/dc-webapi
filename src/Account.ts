@@ -6,8 +6,10 @@ import { AccountInstance } from './interfaces/IAccount'
 const log = new Logger('Account:')
 
 export class Account implements AccountInstance {
-  protected _Eth: Eth
+  private _Eth: Eth
+
   address: string
+  iframeAccountAction: string
 
   constructor() {
     /** init config params */
@@ -19,6 +21,9 @@ export class Account implements AccountInstance {
       web3HttpProviderUrl: httpProviderUrl
     } = config
 
+    /** action for the iframe account create */
+    this.iframeAccountAction = 'DC::Iframe::Account::PrivateKey::'
+
     /** Init new Eth instance */
     this._Eth = new Eth({
       walletName,
@@ -26,8 +31,54 @@ export class Account implements AccountInstance {
       gasParams: { price, limit },
       ERC20ContractInfo: contracts.ERC20
     })
+
+    /** Listen messages in iframe */
+    window.onmessage = event => this._initIframeAccount(event)
   }
 
+  _initIframeAccount(event): void {
+    /** Parse message */
+    const message = event.data
+    /** 
+     * If message type string and in message 
+     * exist iframeAccountAction then create
+     * account with message
+     */
+    if (
+      typeof message === 'string' &&
+      message.indexOf(this.iframeAccountAction) !== -1
+    ) {
+      /** Parse private key with message */
+      const privateKey = message.split('::')[4]
+      /** Get standart wallet password of env or config */
+      const { standartWalletPass } = config
+      /**
+       * If private key exist and private key
+       * correct format then create account
+       * else output error with incorrect key
+       */
+      if (
+        privateKey &&
+        privateKey.length === 66 &&
+        privateKey.substr(0, 2) === '0x'
+      ) {
+        /** Create account */
+        this.init(
+          standartWalletPass,
+          privateKey
+        )
+      } else {
+        log.error(`
+          private key is not define or incorrect, privateKey: ${privateKey},
+          please input to the postMessage correct private key,
+          example: window.postMessage('
+            DC::Iframe::Account::PrivateKey::0x45qwe0a0ca46a6bd3df07923fgebe631b51257q12e0v47cx140BndmFl50ppc89')
+        `)
+      }
+    }
+  }
+
+  /** Get dc-ethereum-utils instance */
   getEthInstance(): Eth {
     return this._Eth
   }
@@ -63,6 +114,7 @@ export class Account implements AccountInstance {
       ? wallet.privateKey
       : privateKeytoCreate
 
+    
     /** 
      * Check exist private key
      * if private key not exist then
@@ -84,6 +136,8 @@ export class Account implements AccountInstance {
     
     /** Save address */
     this.address = add0x(this._Eth.getAccount().address)
+    /** Remove event listener */
+    window.onmessage = null
     log.info(`Account ${this.address} created`) 
   }
 
