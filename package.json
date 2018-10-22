@@ -11,10 +11,10 @@
   "dependencies": {
     "@types/node": "^10.11.7",
     "@types/web3": "^1.0.6",
-    "dc-core": "^1.0.0",
-    "dc-configs": "^1.0.0",
-    "dc-ethereum-utils": "1.0.0",
-    "dc-messaging": "1.0.0",
-    "dc-logging": "^1.0.0"
+    "dc-core": "^0.2.0",
+    "dc-configs": "^0.2.0",
+    "dc-ethereum-utils": "0.2.0",
+    "dc-messaging": "0.2.0",
+    "dc-logging": "^0.2.0"
   }
 }
