@@ -1,12 +1,12 @@
 import {
-  // PlayParams,
   DApp,
+  PlayParams,
   ConnectParams,
   IDAppPlayerInstance
 } from 'dc-core'
 import {
   IGame,
-  // PlayResult,
+  PlayResult,
   ConnectResult,
   InitGameParams,
   DisconnectResult
@@ -72,7 +72,6 @@ export class Game implements IGame {
 
     const dapp = new DApp(dappParams)
     this._GameInstance = await dapp.startClient()
-
     log.info(`Game ready to connect`)
   }
 
@@ -94,27 +93,29 @@ export class Game implements IGame {
         dealerAddress: gameConnect.bankrollerAddress,
         playerAddress: gameConnect.playerAddress,
         channelBalances: {
-          dealer: dec2bet(gameConnect.bankrollerDepositWei),
+          bankroller: dec2bet(gameConnect.bankrollerDepositWei),
           player: dec2bet(gameConnect.playerDepositWei)
         }
       }
     }
   }
 
-  // async play(params: PlayParams): Promise<PlayResult> {
-  //   /** Parse params */
-  //   const { userBet, gameData, rndOpts } = params
-  //   /** Call play method */
-  //   const callPlayResults = await this._GameInstance.play({ userBet, gameData, rndOpts })
+  async play(params: PlayParams): Promise<PlayResult> {
+    /** Parse params */
+    const { userBet, gameData, rndOpts } = params
+    /** Call play method */
+    const callPlayResults = await this._GameInstance.play({ userBet, gameData, rndOpts })
 
-  //   /** Generate results and return */
-  //   return {
-  //     params,
-  //     profit: callPlayResults.profit,
-  //     balances: this._GameInstance.channelState.getData().balance,
-  //     randomNums: callPlayResults.randoms
-  //   }
-  // }
+    /** Generate results and return */
+    const playResult: PlayResult = {
+      params,
+      profit: callPlayResults.profit,
+      balances: this._GameInstance.getChannelStateData().balance,
+      randomNums: callPlayResults.randoms
+    }
+
+    return playResult
+  }
 
   async disconnect(): Promise<DisconnectResult> {
     /** Start game disconnect */
@@ -128,7 +129,7 @@ export class Game implements IGame {
         channelID: gameDisconnect._id,
         channelState: this._getChannelStatus(gameDisconnect.state),
         resultBalances: {
-          dealer: dec2bet(gameDisconnect._bankrollerBalance),
+          bankroller: dec2bet(gameDisconnect._bankrollerBalance),
           player: dec2bet(gameDisconnect._playerBalance)
         }
       }

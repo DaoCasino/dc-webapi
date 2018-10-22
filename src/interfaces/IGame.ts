@@ -15,7 +15,7 @@ export interface InitGameParams {
 }
 
 interface GameBalances {
-  dealer: number
+  bankroller: number
   player: number
 }
 
@@ -48,6 +48,6 @@ export interface DisconnectResult extends ChannelResult {
 export interface IGame {
   start: (peerAddress: string) => Promise<void>
   connect: (params: ConnectParams) => Promise<ConnectResult>
-  // play: (params: PlayParams) => Promise<PlayResult>
+  play: (params: PlayParams) => Promise<PlayResult>
   disconnect: () => Promise<DisconnectResult>
 }
