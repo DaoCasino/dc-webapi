@@ -1,6 +1,19 @@
 {
-  "presets": [[ "@babel/preset-env", { "useBuiltIns": "entry" }]],
-  "plugins": [
-    "@babel/plugin-external-helpers"
-  ]
+  "presets": [
+    ["env", {
+      "modules": false,
+      "targets": {
+        "browsers": ["> 1%", "last 2 versions", "not ie <= 8"]
+      }
+    }],
+    "stage-2",
+    "es2015"
+  ],
+  "plugins": ["transform-runtime"],
+  "env": {
+    "test": {
+      "presets": ["env", "stage-2", "es2015"],
+      "plugins": ["istanbul"]
+    }
+  }
 }
