@@ -1,5 +1,14 @@
+# Cache and node_modules
+.rpt2_cache
 node_modules
-lib
 
+# Build
+lib
+dist
+
+# Lock files
 package-lock.json
 yarn.lock
+
+# Log files
+*.Log
