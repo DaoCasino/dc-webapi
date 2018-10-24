@@ -31,6 +31,9 @@ export class Game implements IGame {
     const transportProvider = await IpfsTransportProvider.create()
     return transportProvider
   }
+  async _stopMessaging(): Promise<void> {
+    await IpfsTransportProvider.stop()
+  }
 
   /**
    * Matching channel state and
@@ -51,7 +54,9 @@ export class Game implements IGame {
         throw new Error(`unknown channel state: ${channelState}`)
     }
   }
-
+  async stop(): Promise<void> {
+    return this._stopMessaging()
+  }
   async start(): Promise<void> {
     const transportProvider = await this._initMessaging()
     const { platformId, blockchainNetwork } = this._configuration
