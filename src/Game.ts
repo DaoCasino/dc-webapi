@@ -1,38 +1,38 @@
-import {
-  DApp,
-  PlayParams,
-  ConnectParams,
-  IDAppPlayerInstance
-} from 'dc-core'
+import { DApp, PlayParams, ConnectParams, IDAppPlayerInstance } from "dc-core"
 import {
   IGame,
   PlayResult,
   ConnectResult,
   InitGameParams,
   DisconnectResult
-} from './interfaces/IGame'
-import { Logger } from 'dc-logging'
-import { config } from 'dc-configs'
-import { dec2bet, Eth } from 'dc-ethereum-utils'
+} from "./interfaces/IGame"
+import { Logger } from "dc-logging"
+import { config, IConfig } from "dc-configs"
+import { dec2bet, Eth } from "dc-ethereum-utils"
 import { IpfsTransportProvider, IMessagingProvider } from "dc-messaging"
 
-const log = new Logger('Game:')
+const log = new Logger("Game:")
 
 export class Game implements IGame {
   private _Eth: Eth
   private _params: InitGameParams
   private _GameInstance: IDAppPlayerInstance
+  private _configuration: IConfig
 
-  constructor(params: InitGameParams) {
+  constructor(params: InitGameParams, configuration = {}) {
     this._params = params
-    this._Eth = this._params.Account.getEthInstance()
+    this._Eth = this._params.account.getEthInstance()
     log.info(`Game ${this._params.name} created!`)
+    this._configuration = { ...config, ...configuration }
   }
 
   /** Create and return messaging provider */
   async _initMessaging(): Promise<IMessagingProvider> {
     const transportProvider = await IpfsTransportProvider.create()
     return transportProvider
+  }
+  async _stopMessaging(): Promise<void> {
+    await IpfsTransportProvider.stop()
   }
 
   /**
@@ -41,23 +41,25 @@ export class Game implements IGame {
    * the form
    */
   _getChannelStatus(channelState: string): string {
-    switch(channelState) {
-      case '0':
-        return 'unused'
-      case '1':
-        return 'opened'
-      case '2':
-        return 'closed'
-      case '3':
-        return 'dispute'
+    switch (channelState) {
+      case "0":
+        return "unused"
+      case "1":
+        return "opened"
+      case "2":
+        return "closed"
+      case "3":
+        return "dispute"
       default:
         throw new Error(`unknown channel state: ${channelState}`)
     }
   }
-
+  async stop(): Promise<void> {
+    return this._stopMessaging()
+  }
   async start(): Promise<void> {
     const transportProvider = await this._initMessaging()
-    const { platformId, blockchainNetwork } = config
+    const { platformId, blockchainNetwork } = this._configuration
     const { contract, gameLogicFunction, name, rules } = this._params
     const dappParams = {
       slug: name,
@@ -78,13 +80,15 @@ export class Game implements IGame {
   async connect(params: ConnectParams): Promise<ConnectResult> {
     /** parse deposit and game data of method params */
     const { playerDeposit, gameData } = params
-    
+
     /** Start connect to the game */
-    const gameConnect = await this._GameInstance
-      .connect({ playerDeposit, gameData })
-    
+    const gameConnect = await this._GameInstance.connect({
+      playerDeposit,
+      gameData
+    })
+
     /** Check channel state */
-    if (this._getChannelStatus(gameConnect.state) === 'opened') {
+    if (this._getChannelStatus(gameConnect.state) === "opened") {
       log.info(`Channel  ${gameConnect.channelId} opened! Go to game!`)
       /** Generate and return data for connected results */
       return {
@@ -104,7 +108,11 @@ export class Game implements IGame {
     /** Parse params */
     const { userBet, gameData, rndOpts } = params
     /** Call play method */
-    const callPlayResults = await this._GameInstance.play({ userBet, gameData, rndOpts })
+    const callPlayResults = await this._GameInstance.play({
+      userBet,
+      gameData,
+      rndOpts
+    })
 
     /** Generate results and return */
     const playResult: PlayResult = {
@@ -120,9 +128,9 @@ export class Game implements IGame {
   async disconnect(): Promise<DisconnectResult> {
     /** Start game disconnect */
     const gameDisconnect = await this._GameInstance.disconnect()
-    
+
     /** Check channel state */
-    if (this._getChannelStatus(gameDisconnect.state) === 'closed') {
+    if (this._getChannelStatus(gameDisconnect.state) === "closed") {
       log.info(`Channel ${gameDisconnect._id} closed and Game Over`)
       /** Generate and return data for connected results */
       return {
