@@ -21,9 +21,10 @@ export class Game implements IGame {
 
   constructor(params: InitGameParams, configuration = {}) {
     this._params = params
+    log.info(this._params)
     this._Eth = this._params.account.getEthInstance()
-    log.info(`Game ${this._params.name} created!`)
     this._configuration = { ...config, ...configuration }
+    log.info(`Game ${this._params.name} created!`, config)
   }
 
   /** Create and return messaging provider */
