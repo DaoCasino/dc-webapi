@@ -20,7 +20,6 @@ export class Account implements AccountInstance {
       gasLimit: limit,
       web3HttpProviderUrl: httpProviderUrl
     } = config
-    log.info("ssdasdasdasdas")
     /** action for the iframe account create */
     this.iframeAccountAction = "DC::Iframe::Account::PrivateKey::"
 
