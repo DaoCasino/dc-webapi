@@ -32,7 +32,7 @@ export class Game implements IGame {
     return transportProvider
   }
   async _stopMessaging(): Promise<void> {
-    await IpfsTransportProvider.stop()
+    // await IpfsTransportProvider.destroy()  // TODO: !!!!!!
   }
 
   /**
