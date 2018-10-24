@@ -1,20 +1,25 @@
 {
   "name": "dc-webapi",
-  "version": "1.0.0",
+  "version": "0.2.0",
   "main": "./lib/index.js",
+  "browser": "dist/dcwebapi.min.js",
+  "module": "dist/dcwebapi.esm.js",
+  "mainBundle": "dist/dcwebapi.cjs.js",
   "license": "MIT",
   "scripts": {
-    "build": "npm-run-all typescript",
+    "build:ts": "npm-run-all typescript",
+    "build": "npm-run-all typescript && node scripts/build.js",
     "clean": "rimraf lib",
     "typescript": "tsc --build"
   },
   "dependencies": {
     "@types/node": "^10.11.7",
     "@types/web3": "^1.0.6",
-    "dc-core": "^0.2.0",
-    "dc-configs": "^0.2.0",
-    "dc-ethereum-utils": "0.2.0",
-    "dc-messaging": "0.2.0",
-    "dc-logging": "^0.2.0"
-  }
+    "dc-configs": "^1.0.2",
+    "dc-core": "^1.0.2",
+    "dc-ethereum-utils": "^1.0.2",
+    "dc-logging": "^1.0.2",
+    "dc-messaging": "^1.0.2"
+  },
+  "gitHead": "865d20c921eb00208778bbdcbb47fe95c2b4ed38"
 }
