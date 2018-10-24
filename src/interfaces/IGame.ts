@@ -1,16 +1,12 @@
-import {
-  PlayParams,
-  IGameLogic,
-  ConnectParams
-} from 'dc-core'
-import { AccountInstance } from './IAccount'
-import { ContractInfo } from 'dc-configs'
+import { PlayParams, IGameLogic, ConnectParams } from "dc-core"
+import { AccountInstance } from "./IAccount"
+import { ContractInfo } from "dc-configs"
 
 export interface InitGameParams {
   name: string
-  gameLogicFunction: () => IGameLogic,
-  Account: AccountInstance,
-  contract: ContractInfo,
+  gameLogicFunction: () => IGameLogic
+  account: AccountInstance
+  contract: ContractInfo
   rules: any
 }
 

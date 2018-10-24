@@ -20,7 +20,6 @@ export class Account implements AccountInstance {
       gasLimit: limit,
       web3HttpProviderUrl: httpProviderUrl
     } = config
-    log.info(contracts.ERC20)
     /** action for the iframe account create */
     this.iframeAccountAction = "DC::Iframe::Account::PrivateKey::"
 
@@ -33,7 +32,9 @@ export class Account implements AccountInstance {
     })
 
     /** Listen messages in iframe */
-    window.onmessage = event => this._initIframeAccount(event)
+    if (typeof window !== "undefined") {
+      window.onmessage = event => this._initIframeAccount(event)
+    }
   }
 
   _initIframeAccount(event): void {
@@ -86,14 +87,17 @@ export class Account implements AccountInstance {
      * if exist not then throw error
      */
     if (!walletPassword) {
-      throw new Error("walletPassword in not define")
+      throw new Error("walletPassword in not defined")
     }
 
     /**
      * Check local storage wallet exist
      * if wallet exist then load wallet
      */
-    if (localStorage.getItem(config.walletName)) {
+    if (
+      typeof localStorage !== "undefined" &&
+      localStorage.getItem(config.walletName)
+    ) {
       this._Eth.loadWallet(walletPassword)
     }
 
@@ -129,7 +133,9 @@ export class Account implements AccountInstance {
     /** Save address */
     this.address = add0x(this._Eth.getAccount().address)
     /** Remove event listener */
-    window.onmessage = null
+    if (typeof window !== "undefined") {
+      window.onmessage = null
+    }
     log.info(`Account ${this.address} created`)
   }
 
@@ -163,6 +169,9 @@ export class Account implements AccountInstance {
      * not exist wallet with name
      * throw new Error
      */
+    if (typeof localStorage === "undefined") {
+      return this._Eth.getWalletAccount().privateKey
+    }
     if (!localStorage.getItem(config.walletName)) {
       throw new Error(`
         Not wallet with name: ${config.walletName}
