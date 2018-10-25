@@ -65,7 +65,7 @@ const runPlay = async ({ game, account, balances }) => {
 }
 describe("Bankroller Tests", () => {
   it("game with remote bankroller in ropsten", async () => {
-    const { game, account, balances } = await startGame("rinkeby")
+    const { game, account, balances } = await startGame("ropsten")
     await runPlay({ game, account, balances })
   })
 })
