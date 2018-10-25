@@ -23,7 +23,7 @@ export class Game implements IGame {
     this._params = params
     this._Eth = this._params.account.getEthInstance()
     log.info(`Game ${this._params.name} created!`)
-    this._configuration = { ...config, ...configuration }
+    this._configuration = { ...config.default, ...configuration }
   }
 
   /** Create and return messaging provider */
