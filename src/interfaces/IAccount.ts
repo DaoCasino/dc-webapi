@@ -1,4 +1,10 @@
+import { IConfig } from 'dc-configs'
 import { LastBalances, Eth } from 'dc-ethereum-utils'
+
+export interface InitAccountParams {
+  ETH: Eth
+  config: IConfig
+}
 
 export interface AccountInstance {
   init: (

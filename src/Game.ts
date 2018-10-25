@@ -1,4 +1,10 @@
-import { DApp, PlayParams, ConnectParams, IDAppPlayerInstance } from "dc-core"
+import {
+  DApp,
+  DAppParams,
+  PlayParams,
+  ConnectParams,
+  IDAppPlayerInstance
+} from "dc-core"
 import {
   IGame,
   PlayResult,
@@ -8,22 +14,22 @@ import {
 } from "./interfaces/IGame"
 import { Logger } from "dc-logging"
 import { config, IConfig } from "dc-configs"
-import { dec2bet, Eth } from "dc-ethereum-utils"
+import { dec2bet, ETHInstance } from "dc-ethereum-utils"
 import { IpfsTransportProvider, IMessagingProvider } from "dc-messaging"
 
 const log = new Logger("Game:")
 
-export class Game implements IGame {
-  private _Eth: Eth
+export default class Game implements IGame {
+  private _Eth: ETHInstance
   private _params: InitGameParams
   private _GameInstance: IDAppPlayerInstance
   private _configuration: IConfig
 
-  constructor(params: InitGameParams, configuration = {}) {
+  constructor(params: InitGameParams) {
     this._params = params
-    this._Eth = this._params.account.getEthInstance()
+    this._Eth = this._params.Eth
     log.info(`Game ${this._params.name} created!`)
-    this._configuration = { ...config, ...configuration }
+    this._configuration = this._params.config
   }
 
   /** Create and return messaging provider */
@@ -54,14 +60,16 @@ export class Game implements IGame {
         throw new Error(`unknown channel state: ${channelState}`)
     }
   }
+  
   async stop(): Promise<void> {
     return this._stopMessaging()
   }
+
   async start(): Promise<void> {
     const transportProvider = await this._initMessaging()
     const { platformId, blockchainNetwork } = this._configuration
     const { contract, gameLogicFunction, name, rules } = this._params
-    const dappParams = {
+    const dappParams: DAppParams = {
       slug: name,
       platformId,
       blockchainNetwork,
