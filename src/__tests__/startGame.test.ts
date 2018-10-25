@@ -53,23 +53,24 @@ const startGame = async (blockchainNetwork: BlockchainNetwork) => {
 
   return { game, account, balances }
 }
-
+const runPlay = async ({ game, account, balances }) => {
+  let betsBalance = balances.bet.balance
+  for (let i = 0; i < 10; i++) {
+    const res = await game.play({
+      userBet: 1,
+      gameData: [2],
+      rndOpts: [[1, 3]]
+    })
+    betsBalance += res.profit
+  }
+  await game.disconnect()
+  const finalBalances = await account.getBalances()
+  expect(betsBalance).to.be.equal(finalBalances.bet.balance)
+  game.stop()
+}
 describe("Bankroller Tests", () => {
-  it("game with remote bankroller", async () => {
+  it("game with remote bankroller in ropsten", async () => {
     const { game, account, balances } = await startGame("ropsten")
-
-    let betsBalance = balances.bet.balance
-    for (let i = 0; i < 10; i++) {
-      const res = await game.play({
-        userBet: 1,
-        gameData: [2],
-        rndOpts: [[1, 3]]
-      })
-      betsBalance += res.profit
-    }
-    await game.disconnect()
-    const finalBalances = await account.getBalances()
-    expect(betsBalance).to.be.equal(finalBalances.bet.balance)
-    game.stop()
+    await runPlay({ game, account, balances })
   })
 })
