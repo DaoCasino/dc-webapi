@@ -1,20 +1,18 @@
-import Game from './Game'
-import Account from './Account'
-import { Eth } from 'dc-ethereum-utils'
-import { config, setDefaultConfig } from "dc-configs"
-import { CreateGameParams, IGame } from './interfaces/IGame'
-import { AccountInstance } from './interfaces/IAccount'
-import { InitWebapiInstance, InitWebapiParams } from './interfaces/IDCWebapi'
+import Game from "./Game"
+import Account from "./Account"
+import { Eth } from "dc-ethereum-utils"
+import { config, setDefaultConfig, IConfigOptions } from "dc-configs"
+import { CreateGameParams, IGame } from "./interfaces/IGame"
+import { AccountInstance } from "./interfaces/IAccount"
+import { InitWebapiInstance } from "./interfaces/IDCWebapi"
 
 export default class DCWebapi implements InitWebapiInstance {
   private _Eth: Eth
-  private _params: InitWebapiParams
 
   account: AccountInstance
-  
-  constructor(params: InitWebapiParams) {
-    this._params = params
-    setDefaultConfig(this._params)
+
+  constructor(params: IConfigOptions) {
+    setDefaultConfig(params)
 
     const {
       contracts,

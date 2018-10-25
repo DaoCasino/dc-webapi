@@ -1,5 +1,5 @@
 import { ContractInfo, IConfig } from "dc-configs"
-import { ETHInstance } from 'dc-ethereum-utils'
+import { ETHInstance } from "dc-ethereum-utils"
 import { PlayParams, IGameLogic, ConnectParams } from "dc-core"
 
 export interface CreateGameParams {
@@ -46,7 +46,7 @@ export interface DisconnectResult extends ChannelResult {
 
 /** Interface for user call */
 export interface IGame {
-  start: (peerAddress: string) => Promise<void>
+  start: () => Promise<void>
   connect: (params: ConnectParams) => Promise<ConnectResult>
   play: (params: PlayParams) => Promise<PlayResult>
   disconnect: () => Promise<DisconnectResult>
