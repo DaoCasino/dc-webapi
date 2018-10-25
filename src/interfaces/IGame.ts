@@ -1,13 +1,17 @@
+import { ContractInfo, IConfig } from "dc-configs"
+import { ETHInstance } from 'dc-ethereum-utils'
 import { PlayParams, IGameLogic, ConnectParams } from "dc-core"
-import { AccountInstance } from "./IAccount"
-import { ContractInfo } from "dc-configs"
 
-export interface InitGameParams {
+export interface CreateGameParams {
   name: string
   gameLogicFunction: () => IGameLogic
-  account: AccountInstance
   contract: ContractInfo
   rules: any
+}
+
+export interface InitGameParams extends CreateGameParams {
+  Eth: ETHInstance
+  config: IConfig
 }
 
 interface GameBalances {
