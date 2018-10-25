@@ -1,5 +1,5 @@
 import { IpfsTransportProvider, DirectTransportProvider } from "dc-messaging"
-import { BlockchainNetwork, setConfig } from "dc-configs"
+import { BlockchainNetwork, setDefaultConfig } from "dc-configs"
 import { Eth as Ethereum } from "dc-ethereum-utils"
 
 import { GlobalGameLogicStore, DApp, DAppFactory } from "dc-core"
@@ -30,7 +30,7 @@ require("./FTE1/dapp.logic")
 const WALLET_PWD = "1234"
 
 const startGame = async (blockchainNetwork: BlockchainNetwork) => {
-  setConfig({ platformId: "DC_local", blockchainNetwork })
+  setDefaultConfig({ platformId: "DC_local", blockchainNetwork })
   const account = new Account()
 
   await account.init(WALLET_PWD, playerPrivateKeys[blockchainNetwork])
