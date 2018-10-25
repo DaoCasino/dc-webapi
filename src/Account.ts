@@ -19,7 +19,7 @@ export class Account implements AccountInstance {
       gasPrice: price,
       gasLimit: limit,
       web3HttpProviderUrl: httpProviderUrl
-    } = config
+    } = config.default
     /** action for the iframe account create */
     this.iframeAccountAction = "DC::Iframe::Account::PrivateKey::"
 
@@ -51,8 +51,8 @@ export class Account implements AccountInstance {
     ) {
       /** Parse private key with message */
       const privateKey = message.split("::")[4]
-      /** Get standart wallet password of env or config */
-      const { standartWalletPass } = config
+      /** Get standart wallet password of env or config.default */
+      const { standartWalletPass } = config.default
       /**
        * If private key exist and private key
        * correct format then create account
@@ -96,7 +96,7 @@ export class Account implements AccountInstance {
      */
     if (
       typeof localStorage !== "undefined" &&
-      localStorage.getItem(config.walletName)
+      localStorage.getItem(config.default.walletName)
     ) {
       this._Eth.loadWallet(walletPassword)
     }
@@ -150,10 +150,10 @@ export class Account implements AccountInstance {
 
     /**
      * Check local storage on exist wallet
-     * with wallet name in config if exist = true
+     * with wallet name in config.default if exist = true
      * then parse wallet and return address
      */
-    if (localStorage.getItem(config.walletName)) {
+    if (localStorage.getItem(config.default.walletName)) {
       return add0x(this._Eth.getWalletAccount().address)
     }
 
@@ -172,9 +172,9 @@ export class Account implements AccountInstance {
     if (typeof localStorage === "undefined") {
       return this._Eth.getWalletAccount().privateKey
     }
-    if (!localStorage.getItem(config.walletName)) {
+    if (!localStorage.getItem(config.default.walletName)) {
       throw new Error(`
-        Not wallet with name: ${config.walletName}
+        Not wallet with name: ${config.default.walletName}
         in localStorage please init account with Account.init() method
       `)
     }
