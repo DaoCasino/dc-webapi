@@ -72,8 +72,8 @@ export class Game implements IGame {
       gameLogicFunction,
       Eth: this._Eth
     }
-
     const dapp = new DApp(dappParams)
+    console.log(dapp)
     this._GameInstance = await dapp.startClient()
     log.info(`Game ready to connect`)
   }
