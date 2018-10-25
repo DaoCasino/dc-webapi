@@ -13,7 +13,7 @@ import {
   DisconnectResult
 } from "./interfaces/IGame"
 import { Logger } from "dc-logging"
-import { IConfig } from "dc-configs"
+import { IConfig, config } from "dc-configs"
 import { dec2bet, ETHInstance } from "dc-ethereum-utils"
 import { IpfsTransportProvider, IMessagingProvider } from "dc-messaging"
 
@@ -28,7 +28,7 @@ export default class Game implements IGame {
   constructor(params: InitGameParams) {
     this._params = params
     this._Eth = this._params.Eth
-    this._configuration = this._params.config
+    this._configuration = config.default
 
     log.info(`Game ${this._params.name} created!`)
   }
@@ -69,7 +69,7 @@ export default class Game implements IGame {
 
   async start(): Promise<void> {
     if (typeof this._Eth.getAccount().address === 'undefined') {
-      throw new Error('Account is not define please create new account and start game again')
+      throw new Error('Account is not defined please create new account and start game again')
     }
 
     const transportProvider = await this._initMessaging()

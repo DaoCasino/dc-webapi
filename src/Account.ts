@@ -1,4 +1,5 @@
 import { Logger } from "dc-logging"
+import { IConfig, config } from 'dc-configs'
 import { Eth, LastBalances, add0x } from "dc-ethereum-utils"
 import { AccountInstance, InitAccountParams } from "./interfaces/IAccount"
 
@@ -6,12 +7,14 @@ const log = new Logger("Account:")
 
 export default class Account implements AccountInstance {
   private _params: InitAccountParams
+  private _configuration: IConfig
 
   address: string
   iframeAccountAction: string
 
   constructor(params: InitAccountParams) {
     this._params = params
+    this._configuration = config.default
     /** action for the iframe account create */
     this.iframeAccountAction = "DC::Iframe::Account::PrivateKey::"
     /** Listen messages in iframe */
@@ -35,7 +38,7 @@ export default class Account implements AccountInstance {
       /** Parse private key with message */
       const privateKey = message.split("::")[4]
       /** Get standart wallet password of env or config */
-      const { standartWalletPass } = this._params.config
+      const { standartWalletPass } = this._configuration
       /**
        * If private key exist and private key
        * correct format then create account
@@ -79,7 +82,7 @@ export default class Account implements AccountInstance {
      */
     if (
       typeof localStorage !== "undefined" &&
-      localStorage.getItem(this._params.config.walletName)
+      localStorage.getItem(this._configuration.walletName)
     ) {
       this._params.ETH.loadWallet(walletPassword)
     }
@@ -133,10 +136,10 @@ export default class Account implements AccountInstance {
 
     /**
      * Check local storage on exist wallet
-     * with wallet name in config if exist = true
+     * with wallet name in config.default if exist = true
      * then parse wallet and return address
      */
-    if (localStorage.getItem(this._params.config.walletName)) {
+    if (localStorage.getItem(this._configuration.walletName)) {
       return add0x(this._params.ETH.getWalletAccount().address)
     }
 
@@ -155,9 +158,9 @@ export default class Account implements AccountInstance {
     if (typeof localStorage === "undefined") {
       return this._params.ETH.getWalletAccount().privateKey
     }
-    if (!localStorage.getItem(this._params.config.walletName)) {
+    if (!localStorage.getItem(this._configuration.walletName)) {
       throw new Error(`
-        Not wallet with name: ${this._params.config.walletName}
+        Not wallet with name: ${this._configuration.walletName}
         in localStorage please init account with Account.init() method
       `)
     }
