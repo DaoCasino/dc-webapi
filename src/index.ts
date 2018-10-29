@@ -13,25 +13,24 @@ export default class DCWebapi implements InitWebapiInstance {
 
   constructor(params: IConfigOptions) {
     setDefaultConfig(params)
-
+  }
+  async start() {
     const {
-      contracts,
       walletName,
       gasPrice: price,
       gasLimit: limit,
-      web3HttpProviderUrl: httpProviderUrl
+      web3HttpProviderUrl: httpProviderUrl,
+      getContracts
     } = config.default
-
     this._Eth = new Eth({
       walletName,
       httpProviderUrl,
       gasParams: { price, limit },
-      ERC20ContractInfo: contracts.ERC20
+      ERC20ContractInfo: (await getContracts()).ERC20
     })
-
     this.account = new Account({ ETH: this._Eth, config: config.default })
+    return this
   }
-
   createGame(params: CreateGameParams): IGame {
     return new Game({ Eth: this._Eth, config: config.default, ...params })
   }
