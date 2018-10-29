@@ -24,13 +24,13 @@ export default class Game extends EventEmitter implements IGame {
   private _Eth: ETHInstance
   private _params: InitGameParams
   private _GameInstance: IDAppPlayerInstance
-  private _configuration: IConfig
+  configuration: IConfig
 
   constructor(params: InitGameParams) {
     super()
     this._params = params
     this._Eth = this._params.Eth
-    this._configuration = config.default
+    this.configuration = params.config
     log.info(`Game ${this._params.name} created!`)
   }
 
@@ -76,7 +76,7 @@ export default class Game extends EventEmitter implements IGame {
     }
     const self = this
     const transportProvider = await this._initMessaging()
-    const { platformId, blockchainNetwork } = this._configuration
+    const { platformId, blockchainNetwork } = this.configuration
     const { contract, gameLogicFunction, name, rules } = this._params
 
     if (blockchainNetwork === 'local') {
