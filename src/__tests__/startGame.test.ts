@@ -32,7 +32,7 @@ const WALLET_PWD = "1234"
 const startGame = async (blockchainNetwork: BlockchainNetwork) => {
   const webapi = await new DCWebapi({
     blockchainNetwork,
-    platformId: "DC_local"
+    platformId: "DC_CloudPlatform"
   }).start()
   webapi.account.init(WALLET_PWD, playerPrivateKeys[blockchainNetwork])
   const balances = await webapi.account.getBalances()
