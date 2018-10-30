@@ -80,10 +80,10 @@ export default class Game extends EventEmitter implements IGame {
     const { contract, gameLogicFunction, name, rules } = this._params
 
     if (blockchainNetwork === 'local') {
-      const contractURL = await contract.address
-      contract.address = await fetch(contractURL.split("->")[0])
-        .then(r => r.json())
-        .then(r => r[contractURL.split("->")[1]])
+      // const contractURL = contract.address
+      contract.address = await fetch(contract.address.split("->")[0])
+        .then(result => result.json())
+        .then(result => result[contract.address.split("->")[1]])
     }
 
     const dappParams: DAppParams = {
