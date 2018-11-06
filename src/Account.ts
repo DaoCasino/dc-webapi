@@ -49,7 +49,8 @@ export default class Account implements AccountInstance {
         privateKey.length === 66 &&
         privateKey.substr(0, 2) === "0x"
       ) {
-        /** Create account */
+        /** clear wallet from localStorage and create account */
+        localStorage.removeItem(this._configuration.walletName)
         this.init(standartWalletPass, privateKey)
       } else {
         log.error(`

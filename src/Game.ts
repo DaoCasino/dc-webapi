@@ -64,6 +64,10 @@ export default class Game extends EventEmitter implements IGame {
     }
   }
 
+  getGameContractAddress(): string {
+    return this._params.contract.address
+  }
+
   async stop(): Promise<void> {
     return this._stopMessaging()
   }
@@ -149,12 +153,20 @@ export default class Game extends EventEmitter implements IGame {
       rndOpts
     })
 
+    const {
+      player,
+      bankroller
+    } = this._GameInstance.getChannelStateData().balance
+
     /** Generate results and return */
     const playResult: PlayResult = {
       params,
       profit: callPlayResults.profit,
-      balances: this._GameInstance.getChannelStateData().balance,
-      randomNums: callPlayResults.randoms
+      randomNums: callPlayResults.randoms,
+      balances: {
+        player: dec2bet(player),
+        bankroller: dec2bet(bankroller)
+      },
     }
 
     return playResult
