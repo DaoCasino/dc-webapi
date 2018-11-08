@@ -1,7 +1,7 @@
 import { IpfsTransportProvider, DirectTransportProvider } from "dc-messaging"
 import { BlockchainNetwork, setDefaultConfig } from "dc-configs"
 import { Eth as Ethereum } from "dc-ethereum-utils"
-
+import os from "os"
 import { GlobalGameLogicStore, DApp, DAppFactory } from "dc-core"
 
 import { Logger } from "dc-logging"
@@ -32,7 +32,7 @@ const WALLET_PWD = "1234"
 const startGame = async (blockchainNetwork: BlockchainNetwork) => {
   const webapi = await new DCWebapi({
     blockchainNetwork,
-    platformId: "DC_local"
+    platformId: os.hostname()
   }).start()
   webapi.account.init(WALLET_PWD, playerPrivateKeys[blockchainNetwork])
   const balances = await webapi.account.getBalances()
@@ -68,7 +68,7 @@ const runPlay = async ({ game, account, balances }) => {
 }
 describe("Bankroller Tests", () => {
   it("game with remote bankroller in ropsten", async () => {
-    const { game, account, balances } = await startGame("ropsten")
+    const { game, account, balances } = await startGame("local")
     await runPlay({ game, account, balances })
   })
 })
