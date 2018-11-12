@@ -25,10 +25,12 @@ export default class Account extends EventEmitter implements AccountInstance {
     /** Listen messages in iframe */
     if (typeof window !== "undefined") {
       window.onmessage = event => this._initIframeAccount(event)
-      window.postMessage({
-        action: this.LOADED_ACTION,
-        data: null
-      }, "*")
+      if (window.self !== window.top) {
+        window.top.postMessage({
+          action: this.LOADED_ACTION,
+          data: null
+        }, '*')
+      }
     }
   }
 
