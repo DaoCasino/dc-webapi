@@ -8,37 +8,45 @@ const log = new Logger("Account:")
 export default class Account implements AccountInstance {
   private _params: InitAccountParams
   private _configuration: IConfig
-
+  
   address: string
+  loadedAction: string
   iframeAccountAction: string
 
   constructor(params: InitAccountParams) {
     this._params = params
     this._configuration = config.default
-    /** action for the iframe account create */
-    this.iframeAccountAction = "DC::Iframe::Account::PrivateKey::"
+    /** Actions for listen events */
+    this.loadedAction = 'DC_ACCOUNT_INSTANCE_LOADED'
+    this.iframeAccountAction = 'DC_ACCOUNT_PRIVATE_KEY'
     /** Listen messages in iframe */
     if (typeof window !== "undefined") {
       window.onmessage = event => this._initIframeAccount(event)
+      if (window.self !== window.top) {
+        window.top.postMessage({
+          action: this.loadedAction,
+          data: null
+        }, '*')
+      }
     }
   }
 
   _initIframeAccount(event): void {
     /** Parse message */
-    const message = event.data
+    const messageData = event.data
     /**
      * If message type string and in message
      * exist iframeAccountAction then create
      * account with message
      */
     if (
-      typeof message === "string" &&
-      message.indexOf(this.iframeAccountAction) !== -1
+      messageData.action === this.iframeAccountAction &&
+      typeof messageData.data === 'object'
     ) {
       /** Parse private key with message */
-      const privateKey = message.split("::")[4]
+      const privateKey = messageData.data.privateKey
       /** Get standart wallet password of env or config */
-      const { standartWalletPass } = this._configuration
+      const { standartWalletPass, walletName } = this._configuration
       /**
        * If private key exist and private key
        * correct format then create account
@@ -50,6 +58,7 @@ export default class Account implements AccountInstance {
         privateKey.substr(0, 2) === "0x"
       ) {
         /** Create account */
+        localStorage.removeItem(walletName)
         this.init(standartWalletPass, privateKey)
       } else {
         log.error(`

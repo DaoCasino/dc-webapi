@@ -1,6 +1,6 @@
 {
   "name": "dc-webapi",
-  "version": "0.1.7",
+  "version": "0.1.11",
   "main": "./lib/index.js",
   "license": "MIT",
   "scripts": {

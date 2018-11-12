@@ -149,11 +149,20 @@ export default class Game extends EventEmitter implements IGame {
       rndOpts
     })
 
+    /** Get state channel balances */
+    const {
+      player,
+      bankroller
+    } = this._GameInstance.getChannelStateData().balance
+
     /** Generate results and return */
     const playResult: PlayResult = {
       params,
       profit: callPlayResults.profit,
-      balances: this._GameInstance.getChannelStateData().balance,
+      balances: {
+        player: dec2bet(player),
+        bankroller: dec2bet(bankroller)
+      },
       randomNums: callPlayResults.randoms
     }
 
