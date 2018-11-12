@@ -24,7 +24,8 @@ export default class Game extends EventEmitter implements IGame {
   private _Eth: ETHInstance
   private _params: InitGameParams
   private _GameInstance: IDAppPlayerInstance
-  configuration: IConfig
+  
+  public configuration: IConfig
 
   constructor(params: InitGameParams) {
     super()
@@ -153,6 +154,7 @@ export default class Game extends EventEmitter implements IGame {
       rndOpts
     })
 
+    /** Get state channel balances */
     const {
       player,
       bankroller
@@ -162,11 +164,11 @@ export default class Game extends EventEmitter implements IGame {
     const playResult: PlayResult = {
       params,
       profit: callPlayResults.profit,
-      randomNums: callPlayResults.randoms,
       balances: {
         player: dec2bet(player),
         bankroller: dec2bet(bankroller)
       },
+      randomNums: callPlayResults.randoms
     }
 
     return playResult
