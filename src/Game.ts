@@ -17,7 +17,7 @@ import { IConfig, config } from "dc-configs"
 import { dec2bet, ETHInstance } from "dc-ethereum-utils"
 import { IpfsTransportProvider, IMessagingProvider } from "dc-messaging"
 import { EventEmitter } from "events"
-
+import fetch from "node-fetch-polyfill"
 const log = new Logger("Game:")
 
 export default class Game extends EventEmitter implements IGame {
@@ -79,7 +79,7 @@ export default class Game extends EventEmitter implements IGame {
     const { platformId, blockchainNetwork } = this.configuration
     const { contract, gameLogicFunction, name, rules } = this._params
 
-    if (blockchainNetwork === 'local') {
+    if (contract.address.indexOf("->") > -1 && blockchainNetwork === 'local') {
       // const contractURL = contract.address
       contract.address = await fetch(contract.address.split("->")[0])
         .then(result => result.json())
