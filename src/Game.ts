@@ -65,6 +65,10 @@ export default class Game extends EventEmitter implements IGame {
     }
   }
 
+  onGameEvent(event: string, func: (data: any) => void) {
+    this._GameInstance.on(event, func)
+  } 
+
   getGameContractAddress(): string {
     return this._params.contract.address
   }

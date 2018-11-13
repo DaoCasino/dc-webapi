@@ -31,6 +31,7 @@ export default class DCWebapi implements InitWebapiInstance {
     this.account = new Account({ ETH: this._Eth, config: config.default })
     return this
   }
+  
   createGame(params: CreateGameParams): IGame {
     return new Game({ Eth: this._Eth, config: config.default, ...params })
   }
