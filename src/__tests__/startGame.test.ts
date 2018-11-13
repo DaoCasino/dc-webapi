@@ -17,7 +17,7 @@ const logger = new Logger("Start Game test")
 const playerPrivateKeys = {
   ropsten: "0x6A5AE922FDE5C8EE877E9470F45B8030F60C19038E9116DB8B343782D9593602",
   rinkeby: "0x6A5AE922FDE5C8EE877E9470F45B8030F60C19038E9116DB8B343782D9593602",
-  local: "0xae6ae8e5ccbfb04590405997ee2d52d2b330726137b875053c36d94e974d162f"
+  local: "0x0021f710f2e56bc29b60d2235024376cc69e0f6bf3a1969d378eb8218882367d"
 }
 import gameManifest from "./FTE1/dapp.manifest"
 import Game from "../Game"
@@ -68,7 +68,7 @@ const runPlay = async ({ game, account, balances }) => {
 }
 describe("Bankroller Tests", () => {
   it("game with remote bankroller in ropsten", async () => {
-    const { game, account, balances } = await startGame("local")
+    const { game, account, balances } = await startGame("ropsten")
     await runPlay({ game, account, balances })
   })
 })
