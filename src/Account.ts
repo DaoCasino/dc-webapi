@@ -22,10 +22,12 @@ export default class Account implements AccountInstance {
     /** Listen messages in iframe */
     if (typeof window !== "undefined") {
       window.onmessage = event => this._initIframeAccount(event)
-      window.postMessage({
-        action: this.loadedAction,
-        data: null
-      }, window.location.origin)
+      if (window.self !== window.top) {
+        window.top.postMessage({
+          action: this.loadedAction,
+          data: null
+        }, '*')
+      }
     }
   }
 

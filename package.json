@@ -1,6 +1,6 @@
 {
   "name": "dc-webapi",
-  "version": "0.1.8",
+  "version": "0.1.11",
   "main": "./lib/index.js",
   "license": "MIT",
   "scripts": {
@@ -20,7 +20,8 @@
     "dc-core": "^0.1.6",
     "dc-ethereum-utils": "^0.1.6",
     "dc-logging": "^0.1.6",
-    "dc-messaging": "^0.1.4"
+    "dc-messaging": "^0.1.4",
+    "node-fetch-polyfill": "^2.0.6"
   },
   "gitHead": "865d20c921eb00208778bbdcbb47fe95c2b4ed38"
 }
