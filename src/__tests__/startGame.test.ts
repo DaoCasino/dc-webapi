@@ -29,10 +29,10 @@ require("./FTE1/dapp.logic")
 
 const WALLET_PWD = "1234"
 
-const startGame = async (blockchainNetwork: BlockchainNetwork) => {
+const startGame = async (blockchainNetwork: BlockchainNetwork, platformId: string) => {
   const webapi = await new DCWebapi({
     blockchainNetwork,
-    platformId: os.hostname()
+    platformId
   }).start()
   webapi.account.init(WALLET_PWD, playerPrivateKeys[blockchainNetwork])
   const balances = await webapi.account.getBalances()
@@ -68,7 +68,7 @@ const runPlay = async ({ game, account, balances }) => {
 }
 describe("Bankroller Tests", () => {
   it("game with remote bankroller in ropsten", async () => {
-    const { game, account, balances } = await startGame("ropsten")
+    const { game, account, balances } = await startGame("ropsten", "DC_sdk") // TODO: hardcode!!!
     await runPlay({ game, account, balances })
   })
 })
