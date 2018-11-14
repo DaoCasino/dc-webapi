@@ -24,7 +24,8 @@ export default class Game extends EventEmitter implements IGame {
   private _Eth: ETHInstance
   private _params: InitGameParams
   private _GameInstance: IDAppPlayerInstance
-  configuration: IConfig
+  
+  public configuration: IConfig
 
   constructor(params: InitGameParams) {
     super()
@@ -62,6 +63,14 @@ export default class Game extends EventEmitter implements IGame {
       default:
         throw new Error(`unknown channel state: ${channelState}`)
     }
+  }
+
+  onGameEvent(event: string, func: (data: any) => void) {
+    this._GameInstance.on(event, func)
+  } 
+
+  getGameContractAddress(): string {
+    return this._params.contract.address
   }
 
   async stop(): Promise<void> {

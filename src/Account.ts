@@ -2,29 +2,32 @@ import { Logger } from "dc-logging"
 import { IConfig, config } from 'dc-configs'
 import { Eth, LastBalances, add0x } from "dc-ethereum-utils"
 import { AccountInstance, InitAccountParams } from "./interfaces/IAccount"
+import { EventEmitter } from "events"
 
 const log = new Logger("Account:")
 
-export default class Account implements AccountInstance {
+export default class Account extends EventEmitter implements AccountInstance {
   private _params: InitAccountParams
   private _configuration: IConfig
   
-  address: string
-  loadedAction: string
-  iframeAccountAction: string
+  public address: string
+  
+  /** Actions events */
+  public LOADED_ACTION: string = 'DC_ACCOUNT_INSTANCE_LOADED'
+  public GET_ACCOUNT_INFO: string = 'DC_ACCOUNT_INFO'
+  public IFRAME_ACCOUNT_ACTION: string = 'DC_ACCOUNT_PRIVATE_KEY'
 
   constructor(params: InitAccountParams) {
+    super()
     this._params = params
     this._configuration = config.default
-    /** Actions for listen events */
-    this.loadedAction = 'DC_ACCOUNT_INSTANCE_LOADED'
-    this.iframeAccountAction = 'DC_ACCOUNT_PRIVATE_KEY'
+    
     /** Listen messages in iframe */
     if (typeof window !== "undefined") {
       window.onmessage = event => this._initIframeAccount(event)
       if (window.self !== window.top) {
         window.top.postMessage({
-          action: this.loadedAction,
+          action: this.LOADED_ACTION,
           data: null
         }, '*')
       }
@@ -40,7 +43,7 @@ export default class Account implements AccountInstance {
      * account with message
      */
     if (
-      messageData.action === this.iframeAccountAction &&
+      messageData.action === this.IFRAME_ACCOUNT_ACTION &&
       typeof messageData.data === 'object'
     ) {
       /** Parse private key with message */
@@ -131,6 +134,8 @@ export default class Account implements AccountInstance {
     if (typeof window !== "undefined") {
       window.onmessage = null
     }
+
+    this.emit(this.GET_ACCOUNT_INFO, this.address)
     log.info(`Account ${this.address} created`)
   }
 
