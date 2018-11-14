@@ -1,8 +1,6 @@
-import { IpfsTransportProvider, DirectTransportProvider } from "dc-messaging"
-import { BlockchainNetwork, setDefaultConfig } from "dc-configs"
-import { Eth as Ethereum } from "dc-ethereum-utils"
+import { BlockchainNetwork } from "dc-configs"
 import os from "os"
-import { GlobalGameLogicStore, DApp, DAppFactory } from "dc-core"
+import { GlobalGameLogicStore } from "dc-core"
 
 import { Logger } from "dc-logging"
 
