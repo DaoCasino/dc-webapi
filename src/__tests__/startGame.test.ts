@@ -12,6 +12,8 @@ import DCWebapi from "../index"
 
 const logger = new Logger("Start Game test")
 
+
+
 const playerPrivateKeys = {
   ropsten: "0x6A5AE922FDE5C8EE877E9470F45B8030F60C19038E9116DB8B343782D9593602",
   rinkeby: "0x6A5AE922FDE5C8EE877E9470F45B8030F60C19038E9116DB8B343782D9593602",

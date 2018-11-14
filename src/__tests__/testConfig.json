@@ -1,0 +1,18 @@
+{
+    "bankroller": {
+        "platformId": "DC_sdk",
+        "dapps_path": "../bankroller-core/data/dapps/",
+        "privateKeys": {
+            "local": "0x1882c2a6d0df1210d643f82f69d0bdfa0e2e1eaa963384826a4f24d5b5529e10",
+            "ropsten": "0xf45ce6697b0dd472f5f290953274b279ad15ea956065b9a9a7b443eb8f8a7267",
+            "rinkeby": "0x3634AB8297A2ECA851A540312214950B0A1E751F45D211574E879DBA37B0F639"
+        }
+    },
+    "player": {
+        "privateKeys": {
+            "ropsten": "0x6A5AE922FDE5C8EE877E9470F45B8030F60C19038E9116DB8B343782D9593602",
+            "rinkeby": "0x6A5AE922FDE5C8EE877E9470F45B8030F60C19038E9116DB8B343782D9593602",
+            "local": "0x0021f710f2e56bc29b60d2235024376cc69e0f6bf3a1969d378eb8218882367d"
+        }
+    }
+}
