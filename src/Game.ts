@@ -15,7 +15,7 @@ import {
 import { Logger } from "dc-logging"
 import { IConfig, config } from "dc-configs"
 import { dec2bet, ETHInstance } from "dc-ethereum-utils"
-import { IpfsTransportProvider, IMessagingProvider } from "dc-messaging"
+import { TransportProviderFactory, IMessagingProvider } from "dc-messaging"
 import { EventEmitter } from "events"
 import fetch from "node-fetch-polyfill"
 const log = new Logger("Game:")
@@ -24,7 +24,7 @@ export default class Game extends EventEmitter implements IGame {
   private _Eth: ETHInstance
   private _params: InitGameParams
   private _GameInstance: IDAppPlayerInstance
-  configuration: IConfig
+  public configuration: IConfig
 
   constructor(params: InitGameParams) {
     super()
@@ -36,7 +36,8 @@ export default class Game extends EventEmitter implements IGame {
 
   /** Create and return messaging provider */
   async _initMessaging(): Promise<IMessagingProvider> {
-    const transportProvider = await IpfsTransportProvider.create()
+    const factory = new TransportProviderFactory()
+    const transportProvider = await factory.create()
     return transportProvider
   }
 
@@ -62,6 +63,14 @@ export default class Game extends EventEmitter implements IGame {
       default:
         throw new Error(`unknown channel state: ${channelState}`)
     }
+  }
+
+  onGameEvent(event: string, func: (data: any) => void) {
+    this._GameInstance.on(event, func)
+  } 
+
+  getGameContractAddress(): string {
+    return this._params.contract.address
   }
 
   async stop(): Promise<void> {
