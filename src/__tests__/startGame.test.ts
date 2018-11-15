@@ -71,4 +71,8 @@ describe("Bankroller Tests", () => {
     const { game, account, balances } = await startGame("ropsten", "DC_sdk") // TODO: hardcode!!!
     await runPlay({ game, account, balances })
   })
+  it("game with remote bankroller in local", async () => {
+    const { game, account, balances } = await startGame("local")
+    await runPlay({ game, account, balances })
+  })
 })
