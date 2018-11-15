@@ -17,14 +17,15 @@ import { IConfig, config } from "dc-configs"
 import { dec2bet, ETHInstance } from "dc-ethereum-utils"
 import { IpfsTransportProvider, IMessagingProvider } from "dc-messaging"
 import { EventEmitter } from "events"
-
+import fetch from "node-fetch-polyfill"
 const log = new Logger("Game:")
 
 export default class Game extends EventEmitter implements IGame {
   private _Eth: ETHInstance
   private _params: InitGameParams
   private _GameInstance: IDAppPlayerInstance
-  configuration: IConfig
+  
+  public configuration: IConfig
 
   constructor(params: InitGameParams) {
     super()
@@ -64,6 +65,14 @@ export default class Game extends EventEmitter implements IGame {
     }
   }
 
+  onGameEvent(event: string, func: (data: any) => void) {
+    this._GameInstance.on(event, func)
+  } 
+
+  getGameContractAddress(): string {
+    return this._params.contract.address
+  }
+
   async stop(): Promise<void> {
     return this._stopMessaging()
   }
@@ -79,7 +88,7 @@ export default class Game extends EventEmitter implements IGame {
     const { platformId, blockchainNetwork } = this.configuration
     const { contract, gameLogicFunction, name, rules } = this._params
 
-    if (blockchainNetwork === 'local') {
+    if (contract.address.indexOf("->") > -1 && blockchainNetwork === 'local') {
       // const contractURL = contract.address
       contract.address = await fetch(contract.address.split("->")[0])
         .then(result => result.json())
@@ -149,11 +158,20 @@ export default class Game extends EventEmitter implements IGame {
       rndOpts
     })
 
+    /** Get state channel balances */
+    const {
+      player,
+      bankroller
+    } = this._GameInstance.getChannelStateData().balance
+
     /** Generate results and return */
     const playResult: PlayResult = {
       params,
       profit: callPlayResults.profit,
-      balances: this._GameInstance.getChannelStateData().balance,
+      balances: {
+        player: dec2bet(player),
+        bankroller: dec2bet(bankroller)
+      },
       randomNums: callPlayResults.randoms
     }
 
