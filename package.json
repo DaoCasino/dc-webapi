@@ -7,7 +7,8 @@
     "build:ts": "npm-run-all typescript",
     "build": "npm-run-all typescript && node scripts/build.js",
     "clean": "rimraf lib",
-    "typescript": "tsc --build"
+    "typescript": "tsc --build",
+    "test:game": "mocha --timeout 99999999 -r ts-node/register src/__tests__/startGame.test.ts"
   },
   "devDependencies": {
     "chai": "^4.1.2",
