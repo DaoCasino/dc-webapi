@@ -1,8 +1,6 @@
-import { IpfsTransportProvider, DirectTransportProvider } from "dc-messaging"
-import { BlockchainNetwork, setDefaultConfig } from "dc-configs"
-import { Eth as Ethereum } from "dc-ethereum-utils"
+import { BlockchainNetwork } from "dc-configs"
 import os from "os"
-import { GlobalGameLogicStore, DApp, DAppFactory } from "dc-core"
+import { GlobalGameLogicStore } from "dc-core"
 
 import { Logger } from "dc-logging"
 
@@ -13,6 +11,8 @@ import { expect } from "chai"
 import DCWebapi from "../index"
 
 const logger = new Logger("Start Game test")
+
+
 
 const playerPrivateKeys = {
   ropsten: "0x6A5AE922FDE5C8EE877E9470F45B8030F60C19038E9116DB8B343782D9593602",
@@ -29,10 +29,10 @@ require("./FTE1/dapp.logic")
 
 const WALLET_PWD = "1234"
 
-const startGame = async (blockchainNetwork: BlockchainNetwork) => {
+const startGame = async (blockchainNetwork: BlockchainNetwork, platformId: string) => {
   const webapi = await new DCWebapi({
     blockchainNetwork,
-    platformId: os.hostname()
+    platformId
   }).start()
   webapi.account.init(WALLET_PWD, playerPrivateKeys[blockchainNetwork])
   const balances = await webapi.account.getBalances()
@@ -68,6 +68,10 @@ const runPlay = async ({ game, account, balances }) => {
 }
 describe("Bankroller Tests", () => {
   it("game with remote bankroller in ropsten", async () => {
+    const { game, account, balances } = await startGame("ropsten", "DC_sdk") // TODO: hardcode!!!
+    await runPlay({ game, account, balances })
+  })
+  it("game with remote bankroller in local", async () => {
     const { game, account, balances } = await startGame("local")
     await runPlay({ game, account, balances })
   })
