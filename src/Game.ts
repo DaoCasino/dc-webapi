@@ -17,7 +17,7 @@ import { IConfig, config } from "dc-configs"
 import { dec2bet, ETHInstance } from "dc-ethereum-utils"
 import { TransportProviderFactory, IMessagingProvider } from "dc-messaging"
 import { EventEmitter } from "events"
-import fetch from "node-fetch-polyfill"
+import fetch from "cross-fetch"
 const log = new Logger("Game:")
 
 export default class Game extends EventEmitter implements IGame {
