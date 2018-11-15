@@ -72,7 +72,7 @@ describe("Bankroller Tests", () => {
     await runPlay({ game, account, balances })
   })
   it("game with remote bankroller in local", async () => {
-    const { game, account, balances } = await startGame("local")
+    const { game, account, balances } = await startGame("local",os.hostname())
     await runPlay({ game, account, balances })
   })
 })
