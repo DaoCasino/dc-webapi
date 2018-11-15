@@ -17,7 +17,7 @@ const logger = new Logger("Start Game test")
 const playerPrivateKeys = {
   ropsten: "0x6A5AE922FDE5C8EE877E9470F45B8030F60C19038E9116DB8B343782D9593602",
   rinkeby: "0x6A5AE922FDE5C8EE877E9470F45B8030F60C19038E9116DB8B343782D9593602",
-  local: "0x0021f710f2e56bc29b60d2235024376cc69e0f6bf3a1969d378eb8218882367d"
+  local: "0xae6ae8e5ccbfb04590405997ee2d52d2b330726137b875053c36d94e974d162f"
 }
 import gameManifest from "./FTE1/dapp.manifest"
 import Game from "../Game"
@@ -45,7 +45,7 @@ const startGame = async (blockchainNetwork: BlockchainNetwork) => {
   })
 
   await game.start()
-  await game.connect({ playerDeposit: 10, gameData: [0, 0] })
+  await game.connect({ playerDeposit: 10, gameData: "0x42" })
 
   // const game = new DAppFactory(transportProvider).startClient({ name: "game1" , })
 
