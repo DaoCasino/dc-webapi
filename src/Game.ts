@@ -70,7 +70,7 @@ export default class Game extends EventEmitter implements IGame {
   } 
 
   getGameContractAddress(): string {
-    return this._params.contract.address
+    return this._params.gameContractAddress
   }
 
   async stop(): Promise<void> {
@@ -86,23 +86,23 @@ export default class Game extends EventEmitter implements IGame {
     const self = this
     const transportProvider = await this._initMessaging()
     const { platformId, blockchainNetwork } = this.configuration
-    const { contract, gameLogicFunction, name, rules } = this._params
+    const { gameLogicFunction, name, rules } = this._params
 
-    if (contract.address.indexOf("->") > -1 && blockchainNetwork === 'local') {
-      // const contractURL = contract.address
-      contract.address = await fetch(contract.address.split("->")[0])
+    let { gameContractAddress } = this._params
+    if (gameContractAddress.indexOf("->") > -1 && blockchainNetwork === 'local') {
+      gameContractAddress = await fetch(gameContractAddress.split("->")[0])
         .then(result => result.json())
-        .then(result => result[contract.address.split("->")[1]])
+        .then(result => result[gameContractAddress.split("->")[1]])
     }
 
     const dappParams: DAppParams = {
       slug: name,
+      rules,
       platformId,
       blockchainNetwork,
-      contract,
-      rules,
-      roomProvider: transportProvider,
       gameLogicFunction,
+      gameContractAddress,
+      roomProvider: transportProvider,
       Eth: this._Eth
     }
     const dapp = new DApp(dappParams)
