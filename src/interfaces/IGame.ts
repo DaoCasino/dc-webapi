@@ -1,4 +1,4 @@
-import { ContractInfo, IConfig } from "dc-configs"
+import { IConfig } from "dc-configs"
 import { ETHInstance } from "dc-ethereum-utils"
 import { PlayParams, IGameLogic, ConnectParams } from "dc-core"
 import { EventEmitter } from "events"
@@ -6,7 +6,7 @@ import { EventEmitter } from "events"
 export interface CreateGameParams {
   name: string
   gameLogicFunction: () => IGameLogic
-  contract: ContractInfo
+  gameContractAddress: string
   rules: any
 }
 

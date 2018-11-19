@@ -20,13 +20,14 @@ export default class DCWebapi implements InitWebapiInstance {
       gasPrice: price,
       gasLimit: limit,
       web3HttpProviderUrl: httpProviderUrl,
-      getContracts
+      contracts
     } = config.default
+
     this._Eth = new Eth({
       walletName,
       httpProviderUrl,
       gasParams: { price, limit },
-      ERC20ContractInfo: (await getContracts()).ERC20
+      ERC20ContractInfo: contracts.ERC20
     })
     this.account = new Account({ ETH: this._Eth, config: config.default })
     return this
