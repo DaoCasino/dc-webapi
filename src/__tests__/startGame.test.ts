@@ -12,8 +12,6 @@ import DCWebapi from "../index"
 
 const logger = new Logger("Start Game test")
 
-
-
 const playerPrivateKeys = {
   ropsten: "0x6A5AE922FDE5C8EE877E9470F45B8030F60C19038E9116DB8B343782D9593602",
   rinkeby: "0x6A5AE922FDE5C8EE877E9470F45B8030F60C19038E9116DB8B343782D9593602",
@@ -29,7 +27,10 @@ require("./FTE1/dapp.logic")
 
 const WALLET_PWD = "1234"
 
-const startGame = async (blockchainNetwork: BlockchainNetwork, platformId: string) => {
+const startGame = async (
+  blockchainNetwork: BlockchainNetwork,
+  platformId: string
+) => {
   const webapi = await new DCWebapi({
     blockchainNetwork,
     platformId
@@ -68,11 +69,14 @@ const runPlay = async ({ game, account, balances }) => {
 }
 describe("Bankroller Tests", () => {
   it("game with remote bankroller in ropsten", async () => {
-    const { game, account, balances } = await startGame("ropsten", "DC_sdk") // TODO: hardcode!!!
+    const { game, account, balances } = await startGame(
+      "ropsten",
+      os.hostname()
+    ) // TODO: hardcode!!!
     await runPlay({ game, account, balances })
   })
-  it("game with remote bankroller in local", async () => {
-    const { game, account, balances } = await startGame("local",os.hostname())
-    await runPlay({ game, account, balances })
-  })
+  // it("game with remote bankroller in local", async () => {
+  //   const { game, account, balances } = await startGame("local", os.hostname())
+  //   await runPlay({ game, account, balances })
+  // })
 })
