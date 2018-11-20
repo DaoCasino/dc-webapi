@@ -39,7 +39,7 @@ const startGame = async (blockchainNetwork: BlockchainNetwork, platformId: strin
 
   const game = webapi.createGame({
     name: "DCGame_FTE_v1",
-    contract: gameManifest.getContract(blockchainNetwork),
+    gameContractAddress: gameManifest.getContract(blockchainNetwork).address,
     gameLogicFunction: globalGameStore.getGameLogic("DCGame_FTE_v1"),
     rules: gameManifest.rules
   })
