@@ -89,7 +89,7 @@ export default class Game extends EventEmitter implements IGame {
     const { gameLogicFunction, name, rules } = this._params
 
     let { gameContractAddress } = this._params
-    if (gameContractAddress.indexOf("->") > -1 && blockchainNetwork === 'local') {
+    if (blockchainNetwork === 'local' && gameContractAddress.indexOf("->") > -1) {
       gameContractAddress = await fetch(gameContractAddress.split("->")[0])
         .then(result => result.json())
         .then(result => result[gameContractAddress.split("->")[1]])
