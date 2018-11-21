@@ -16,18 +16,16 @@ import { Logger } from "dc-logging"
 import { IConfig, config } from "dc-configs"
 import { dec2bet, ETHInstance } from "dc-ethereum-utils"
 import { TransportProviderFactory, IMessagingProvider } from "dc-messaging"
-import { EventEmitter } from "events"
 import fetch from "cross-fetch"
 const log = new Logger("Game:")
 
-export default class Game extends EventEmitter implements IGame {
+export default class Game implements IGame {
   private _Eth: ETHInstance
   private _params: InitGameParams
   private _GameInstance: IDAppPlayerInstance
   public configuration: IConfig
 
   constructor(params: InitGameParams) {
-    super()
     this._params = params
     this._Eth = this._params.Eth
     this.configuration = params.config
@@ -109,19 +107,20 @@ export default class Game extends EventEmitter implements IGame {
       Eth: this._Eth
     }
     const dapp = new DApp(dappParams)
+    self._params.events.emit("webapi::status", 1111)
     dapp.on("dapp::status", data => {
-      self.emit("webapi::status", data)
+      self._params.events.emit("webapi::status", data)
     })
     this._GameInstance = await dapp.startClient()
     this._GameInstance.on("instance::status", data => {
-      self.emit("webapi::status", { message: "event from instance", data })
+      self._params.events.emit("webapi::status", { message: "event from instance", data })
     })
-    this.emit("webapi::status", { message: "Game ready to connect", data: {} })
+    self._params.events.emit("webapi::status", { message: "Game ready to connect", data: {} })
     log.info(`Game ready to connect`)
   }
 
   async connect(params: ConnectParams): Promise<ConnectResult> {
-    this.emit("webapi::status", { message: "client try to connect", data: {} })
+    this._params.events.emit("webapi::status", { message: "client try to connect", data: {} })
     /** parse deposit and game data of method params */
     const { playerDeposit, gameData } = params
 
@@ -133,7 +132,7 @@ export default class Game extends EventEmitter implements IGame {
 
     /** Check channel state */
     if (this._getChannelStatus(gameConnect.state) === "opened") {
-      this.emit("connectionResult", {
+      this._params.events.emit("connectionResult", {
         message: "connect to bankroller succefull"
       })
       log.info(`Channel  ${gameConnect.channelId} opened! Go to game!`)
