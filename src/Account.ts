@@ -2,11 +2,11 @@ import { Logger } from "dc-logging"
 import { IConfig, config } from 'dc-configs'
 import { Eth, LastBalances, add0x } from "dc-ethereum-utils"
 import { AccountInstance, InitAccountParams } from "./interfaces/IAccount"
-import { EventEmitter } from "events"
+import { ActionData } from './interfaces/IDCWebapi'
 
 const log = new Logger("Account:")
 
-export default class Account extends EventEmitter implements AccountInstance {
+export default class Account implements AccountInstance {
   private _params: InitAccountParams
   private _configuration: IConfig
   
@@ -18,23 +18,11 @@ export default class Account extends EventEmitter implements AccountInstance {
   public IFRAME_ACCOUNT_ACTION: string = 'DC_ACCOUNT_PRIVATE_KEY'
 
   constructor(params: InitAccountParams) {
-    super()
     this._params = params
     this._configuration = config.default
-    
-    /** Listen messages in iframe */
-    if (typeof window !== "undefined") {
-      window.onmessage = event => this._initIframeAccount(event)
-      if (window.self !== window.top) {
-        window.top.postMessage({
-          action: this.LOADED_ACTION,
-          data: null
-        }, '*')
-      }
-    }
   }
 
-  _initIframeAccount(event): void {
+  initAccountInIframe(event: ActionData): void {
     /** Parse message */
     const messageData = event.data
     /**
@@ -42,12 +30,9 @@ export default class Account extends EventEmitter implements AccountInstance {
      * exist iframeAccountAction then create
      * account with message
      */
-    if (
-      messageData.action === this.IFRAME_ACCOUNT_ACTION &&
-      typeof messageData.data === 'object'
-    ) {
+    if (typeof messageData === 'object') {
       /** Parse private key with message */
-      const privateKey = messageData.data.privateKey
+      const privateKey = messageData.privateKey
       /** Get standart wallet password of env or config */
       const { standartWalletPass, walletName } = this._configuration
       /**
@@ -64,13 +49,21 @@ export default class Account extends EventEmitter implements AccountInstance {
         localStorage.removeItem(walletName)
         this.init(standartWalletPass, privateKey)
       } else {
-        log.error(`
+        const error = new Error(`
           private key is not define or incorrect, privateKey: ${privateKey},
           please input to the postMessage correct private key,
-          example: window.postMessage('
-            DC::Iframe::Account::PrivateKey::0x45qwe0a0ca46a6bd3df07923fgebe631b51257q12e0v47cx140BndmFl50ppc89')
+          example: window.postMessage({
+            action: 'DC_INIT_ACCOUNT',
+            data: {
+              privateKey: '0x45qwe0a0ca46a6bd3df07923fgebe631b51257q12e0v47cx140BndmFl50ppc89'
+            }
+          })
         `)
+
+        throw error
       }
+    } else {
+      throw new Error('Incorrect message data, messageData undefined or not object')
     }
   }
 
@@ -135,7 +128,7 @@ export default class Account extends EventEmitter implements AccountInstance {
       window.onmessage = null
     }
 
-    this.emit(this.GET_ACCOUNT_INFO, this.address)
+    this._params.events.emit(this.GET_ACCOUNT_INFO, this.address)
     log.info(`Account ${this.address} created`)
   }
 

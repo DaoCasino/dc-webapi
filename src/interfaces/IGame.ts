@@ -2,7 +2,6 @@ import { IConfig } from "dc-configs"
 import { ETHInstance } from "dc-ethereum-utils"
 import { PlayParams, IGameLogic, ConnectParams } from "dc-core"
 import { EventEmitter } from "events"
-
 export interface CreateGameParams {
   name: string
   gameLogicFunction: () => IGameLogic
@@ -12,7 +11,8 @@ export interface CreateGameParams {
 
 export interface InitGameParams extends CreateGameParams {
   Eth: ETHInstance
-  config: IConfig
+  config: IConfig,
+  events: EventEmitter
 }
 
 interface GameBalances {
@@ -46,8 +46,11 @@ export interface DisconnectResult extends ChannelResult {
 }
 
 /** Interface for user call */
-export interface IGame extends EventEmitter {
-  onGameEvent: (event: string, func: (data: any) => void) => void
+export interface IGame {
+  onGameEvent: (
+    event: string,
+    func: (data: any) => void
+  ) => void
   start: () => Promise<void>
   connect: (params: ConnectParams) => Promise<ConnectResult>
   play: (params: PlayParams) => Promise<PlayResult>
