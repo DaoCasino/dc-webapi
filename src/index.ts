@@ -6,12 +6,20 @@ import { CreateGameParams, IGame } from "./interfaces/IGame"
 import { AccountInstance } from "./interfaces/IAccount"
 import { WebapiInstance, ActionData } from "./interfaces/IDCWebapi"
 import { EventEmitter } from "events"
+import { Logger } from 'dc-logging'
+
+const log = new Logger('webapi:')
 
 export default class DCWebapi implements WebapiInstance {
   private _Eth: Eth
   private _Events: EventEmitter
 
   account: AccountInstance
+
+  // Global Events
+  ACTION_GAME_READY: string = 'GAME_READY_TO_START'
+  ACTION_WEBAPI_READY: string = 'WEBAPI_READY'
+  ACTION_PLATFORM_PARAMS: string = 'CONFIGURE_PLATFORM_PARAMS'
 
   constructor(params: IConfigOptions) {
     setDefaultConfig(params)
@@ -27,9 +35,10 @@ export default class DCWebapi implements WebapiInstance {
 
   emit(
     eventName: string,
-    eventData?: any
+    eventData: any = null
   ): void {
     this._Events.emit(eventName, eventData)
+    window.top.postMessage({ action: eventName, data: eventData }, '*')
   }
 
   async start() {
@@ -54,35 +63,23 @@ export default class DCWebapi implements WebapiInstance {
       config: config.default,
       events: this._Events
     })
-
-    if (typeof window !== 'undefined') {
-      window.addEventListener('message', event => {
-        self.listeners(event.data)
-      }, false)
-    }
-
-    self.on('*', self.listeners)
+    
     if (typeof window !== 'undefined' && window.self !== window.top) {
       window.addEventListener('message', event => {
         self.listeners(event.data)
       }, false)
-
-      window.top.postMessage({
-        action: 'DC_WEBAPI_LOADED',
-        data: null
-      }, '*')
     }
 
+    this.emit(this.ACTION_WEBAPI_READY)
     return this
   }
 
   listeners(eventData: ActionData) {
-    console.log(eventData)
     switch (eventData.action) {
-      case 'DC_INIT_ACCOUNT':
-        this.account.initAccountInIframe(eventData)
-      case 'DC_CHANGE_GAME_PARAMS':
+      case this.ACTION_PLATFORM_PARAMS:
         setDefaultConfig(eventData.data)
+        this.account.initAccountInIframe(eventData)
+        this.emit(this.ACTION_GAME_READY, eventData)
     }
   }
   

@@ -65,7 +65,7 @@ export default class Game implements IGame {
 
   onGameEvent(event: string, func: (data: any) => void) {
     this._GameInstance.on(event, func)
-  } 
+  }
 
   getGameContractAddress(): string {
     return this._params.gameContractAddress
@@ -87,8 +87,10 @@ export default class Game implements IGame {
     const { gameLogicFunction, name, rules } = this._params
 
     let { gameContractAddress } = this._params
-    log.info(this._params)
-    if (blockchainNetwork === 'local' && gameContractAddress.indexOf("->") > -1) {
+    if (
+      blockchainNetwork === "local" &&
+      gameContractAddress.indexOf("->") > -1
+    ) {
       gameContractAddress = await fetch(gameContractAddress.split("->")[0])
         .then(result => result.json())
         .then(result => result[gameContractAddress.split("->")[1]])
