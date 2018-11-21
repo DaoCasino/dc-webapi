@@ -123,13 +123,10 @@ export default class Game extends EventEmitter implements IGame {
   async connect(params: ConnectParams): Promise<ConnectResult> {
     this.emit("webapi::status", { message: "client try to connect", data: {} })
     /** parse deposit and game data of method params */
-    const { playerDeposit, gameData } = params
+    const { playerDeposit } = params
 
     /** Start connect to the game */
-    const gameConnect = await this._GameInstance.connect({
-      playerDeposit,
-      gameData
-    })
+    const gameConnect = await this._GameInstance.connect({ playerDeposit })
 
     /** Check channel state */
     if (this._getChannelStatus(gameConnect.state) === "opened") {
@@ -153,12 +150,11 @@ export default class Game extends EventEmitter implements IGame {
 
   async play(params: PlayParams): Promise<PlayResult> {
     /** Parse params */
-    const { userBet, gameData, rndOpts } = params
+    const { userBets, gameData } = params
     /** Call play method */
     const callPlayResults = await this._GameInstance.play({
-      userBet,
-      gameData,
-      rndOpts
+      userBets,
+      gameData
     })
 
     /** Get state channel balances */
