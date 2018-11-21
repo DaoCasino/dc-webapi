@@ -38,7 +38,10 @@ export default class DCWebapi implements WebapiInstance {
     eventData: any = null
   ): void {
     this._Events.emit(eventName, eventData)
-    window.top.postMessage({ action: eventName, data: eventData }, '*')
+    window.top.postMessage({
+      action: eventName,
+      data: eventData
+    }, '*')
   }
 
   async start() {
@@ -64,7 +67,10 @@ export default class DCWebapi implements WebapiInstance {
       events: this._Events
     })
     
-    if (typeof window !== 'undefined' && window.self !== window.top) {
+    if (
+      typeof window !== 'undefined' &&
+      window.self !== window.top
+    ) {
       window.addEventListener('message', event => {
         self.listeners(event.data)
       }, false)
