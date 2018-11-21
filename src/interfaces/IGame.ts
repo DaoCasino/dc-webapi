@@ -47,10 +47,7 @@ export interface DisconnectResult extends ChannelResult {
 
 /** Interface for user call */
 export interface IGame extends EventEmitter {
-  onGameEvent: (
-    event: string,
-    func: (data: any) => void
-  ) => void
+  onGameEvent: (event: string, func: (data: any) => void) => void
   start: () => Promise<void>
   connect: (params: ConnectParams) => Promise<ConnectResult>
   play: (params: PlayParams) => Promise<PlayResult>
