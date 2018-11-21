@@ -38,10 +38,12 @@ export default class DCWebapi implements WebapiInstance {
     eventData: any = null
   ): void {
     this._Events.emit(eventName, eventData)
-    window.top.postMessage({
-      action: eventName,
-      data: eventData
-    }, '*')
+    if (typeof window !== 'undefined') {
+      window.top.postMessage({
+        action: eventName,
+        data: eventData
+      }, '*')
+    }
   }
 
   async start() {
