@@ -12,7 +12,7 @@ export interface CreateGameParams {
 export interface InitGameParams extends CreateGameParams {
   Eth: ETHInstance
   config: IConfig,
-  events: EventEmitter
+  eventEmitter: EventEmitter
 }
 
 interface GameBalances {
