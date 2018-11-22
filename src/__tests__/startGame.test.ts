@@ -46,7 +46,7 @@ const startGame = async (
   })
 
   await game.start()
-  await game.connect({ playerDeposit: 10, gameData: "0x42" })
+  await game.connect({ playerDeposit: 10 })
 
   // const game = new DAppFactory(transportProvider).startClient({ name: "game1" , })
 
