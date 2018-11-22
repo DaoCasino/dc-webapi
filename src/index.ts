@@ -8,8 +8,6 @@ import { WebapiInstance, ActionData } from "./interfaces/IDCWebapi"
 import { EventEmitter } from "events"
 import { Logger } from 'dc-logging'
 
-const log = new Logger('webapi:')
-
 export default class DCWebapi implements WebapiInstance {
   private _Eth: Eth
   private _Events: EventEmitter
@@ -38,7 +36,9 @@ export default class DCWebapi implements WebapiInstance {
     eventData: any = null
   ): void {
     this._Events.emit(eventName, eventData)
-    window.top.postMessage({ action: eventName, data: eventData }, '*')
+    if (typeof window !== 'undefined') {
+      window.top.postMessage({ action: eventName, data: eventData }, '*')
+    }
   }
 
   async start() {
