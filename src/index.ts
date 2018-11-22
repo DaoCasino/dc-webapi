@@ -85,9 +85,10 @@ export default class DCWebapi implements WebapiInstance {
   listeners(eventData: ActionData) {
     switch (eventData.action) {
       case this.ACTION_PLATFORM_PARAMS:
-        setDefaultConfig({  ...eventData.data })
+        setDefaultConfig({ ...this._params, ...eventData.data })
         this.account.initAccountInIframe(eventData)
         this.emit(this.ACTION_GAME_READY, eventData)
+        // TODO: implement stop listen event
     }
   }
   
