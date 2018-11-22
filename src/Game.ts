@@ -106,6 +106,7 @@ export default class Game implements IGame {
       roomProvider: transportProvider,
       Eth: this._Eth
     }
+    
     const dapp = new DApp(dappParams)
     self._params.events.emit("webapi::status", 1111)
     dapp.on("dapp::status", data => {

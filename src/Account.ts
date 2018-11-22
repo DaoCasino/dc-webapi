@@ -123,11 +123,7 @@ export default class Account implements AccountInstance {
 
     /** Save address */
     this.address = add0x(this._params.ETH.getAccount().address)
-    /** Remove event listener */
-    if (typeof window !== "undefined") {
-      window.onmessage = null
-    }
-
+    /** Emit created account event */
     this._params.events.emit(this.GET_ACCOUNT_INFO, this.address)
     log.info(`Account ${this.address} created`)
   }

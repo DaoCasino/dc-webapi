@@ -15,6 +15,8 @@ export default class DCWebapi implements WebapiInstance {
   private _Events: EventEmitter
 
   account: AccountInstance
+  isIframe: boolean
+  isBrowser: boolean
 
   // Global Events
   ACTION_GAME_READY: string = 'GAME_READY_TO_START'
@@ -24,6 +26,8 @@ export default class DCWebapi implements WebapiInstance {
   constructor(params: IConfigOptions) {
     setDefaultConfig(params)
     this._Events = new EventEmitter()
+    this.isBrowser = (typeof window !== 'undefined')
+    this.isIframe = (this.isBrowser && window.self !== window.top)
   }
 
   on(
@@ -38,7 +42,7 @@ export default class DCWebapi implements WebapiInstance {
     eventData: any = null
   ): void {
     this._Events.emit(eventName, eventData)
-    if (typeof window !== 'undefined') {
+    if (this.isBrowser) {
       window.top.postMessage({
         action: eventName,
         data: eventData
@@ -69,10 +73,7 @@ export default class DCWebapi implements WebapiInstance {
       events: this._Events
     })
     
-    if (
-      typeof window !== 'undefined' &&
-      window.self !== window.top
-    ) {
+    if (this.isBrowser && this.isIframe) {
       window.addEventListener('message', event => {
         self.listeners(event.data)
       }, false)
