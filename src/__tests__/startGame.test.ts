@@ -1,8 +1,6 @@
-import { IpfsTransportProvider, DirectTransportProvider } from "dc-messaging"
-import { BlockchainNetwork, setDefaultConfig } from "dc-configs"
-import { Eth as Ethereum } from "dc-ethereum-utils"
+import { BlockchainNetwork } from "dc-configs"
 import os from "os"
-import { GlobalGameLogicStore, DApp, DAppFactory } from "dc-core"
+import { GlobalGameLogicStore } from "dc-core"
 
 import { Logger } from "dc-logging"
 
@@ -17,7 +15,7 @@ const logger = new Logger("Start Game test")
 const playerPrivateKeys = {
   ropsten: "0x6A5AE922FDE5C8EE877E9470F45B8030F60C19038E9116DB8B343782D9593602",
   rinkeby: "0x6A5AE922FDE5C8EE877E9470F45B8030F60C19038E9116DB8B343782D9593602",
-  local: "0x0021f710f2e56bc29b60d2235024376cc69e0f6bf3a1969d378eb8218882367d"
+  local: "0xae6ae8e5ccbfb04590405997ee2d52d2b330726137b875053c36d94e974d162f"
 }
 import gameManifest from "./FTE1/dapp.manifest"
 import Game from "../Game"
@@ -29,23 +27,26 @@ require("./FTE1/dapp.logic")
 
 const WALLET_PWD = "1234"
 
-const startGame = async (blockchainNetwork: BlockchainNetwork) => {
+const startGame = async (
+  blockchainNetwork: BlockchainNetwork,
+  platformId: string
+) => {
   const webapi = await new DCWebapi({
     blockchainNetwork,
-    platformId: os.hostname()
+    platformId
   }).start()
   webapi.account.init(WALLET_PWD, playerPrivateKeys[blockchainNetwork])
   const balances = await webapi.account.getBalances()
 
   const game = webapi.createGame({
     name: "DCGame_FTE_v1",
-    contract: gameManifest.getContract(blockchainNetwork),
+    gameContractAddress: gameManifest.getContract(blockchainNetwork).address,
     gameLogicFunction: globalGameStore.getGameLogic("DCGame_FTE_v1"),
     rules: gameManifest.rules
   })
 
   await game.start()
-  await game.connect({ playerDeposit: 10, gameData: [0, 0] })
+  await game.connect({ playerDeposit: 10 })
 
   // const game = new DAppFactory(transportProvider).startClient({ name: "game1" , })
 
@@ -68,7 +69,14 @@ const runPlay = async ({ game, account, balances }) => {
 }
 describe("Bankroller Tests", () => {
   it("game with remote bankroller in ropsten", async () => {
-    const { game, account, balances } = await startGame("local")
+    const { game, account, balances } = await startGame(
+      "ropsten",
+      os.hostname()
+    ) // TODO: hardcode!!!
     await runPlay({ game, account, balances })
   })
+  // it("game with remote bankroller in local", async () => {
+  //   const { game, account, balances } = await startGame("local", os.hostname())
+  //   await runPlay({ game, account, balances })
+  // })
 })

@@ -15,20 +15,17 @@ import {
 import { Logger } from "dc-logging"
 import { IConfig, config } from "dc-configs"
 import { dec2bet, ETHInstance } from "dc-ethereum-utils"
-import { IpfsTransportProvider, IMessagingProvider } from "dc-messaging"
-import { EventEmitter } from "events"
-import fetch from "node-fetch-polyfill"
+import { TransportProviderFactory, IMessagingProvider } from "dc-messaging"
+import fetch from "cross-fetch"
 const log = new Logger("Game:")
 
-export default class Game extends EventEmitter implements IGame {
+export default class Game implements IGame {
   private _Eth: ETHInstance
   private _params: InitGameParams
   private _GameInstance: IDAppPlayerInstance
-  
   public configuration: IConfig
 
   constructor(params: InitGameParams) {
-    super()
     this._params = params
     this._Eth = this._params.Eth
     this.configuration = params.config
@@ -37,7 +34,8 @@ export default class Game extends EventEmitter implements IGame {
 
   /** Create and return messaging provider */
   async _initMessaging(): Promise<IMessagingProvider> {
-    const transportProvider = await IpfsTransportProvider.create()
+    const factory = new TransportProviderFactory()
+    const transportProvider = await factory.create()
     return transportProvider
   }
 
@@ -67,10 +65,10 @@ export default class Game extends EventEmitter implements IGame {
 
   onGameEvent(event: string, func: (data: any) => void) {
     this._GameInstance.on(event, func)
-  } 
+  }
 
   getGameContractAddress(): string {
-    return this._params.contract.address
+    return this._params.gameContractAddress
   }
 
   async stop(): Promise<void> {
@@ -86,51 +84,52 @@ export default class Game extends EventEmitter implements IGame {
     const self = this
     const transportProvider = await this._initMessaging()
     const { platformId, blockchainNetwork } = this.configuration
-    const { contract, gameLogicFunction, name, rules } = this._params
+    const { gameLogicFunction, name, rules } = this._params
 
-    if (contract.address.indexOf("->") > -1 && blockchainNetwork === 'local') {
-      // const contractURL = contract.address
-      contract.address = await fetch(contract.address.split("->")[0])
+    let { gameContractAddress } = this._params
+    if (
+      blockchainNetwork === "local" &&
+      gameContractAddress.indexOf("->") > -1
+    ) {
+      gameContractAddress = await fetch(gameContractAddress.split("->")[0])
         .then(result => result.json())
-        .then(result => result[contract.address.split("->")[1]])
+        .then(result => result[gameContractAddress.split("->")[1]])
     }
 
     const dappParams: DAppParams = {
       slug: name,
+      rules,
       platformId,
       blockchainNetwork,
-      contract,
-      rules,
-      roomProvider: transportProvider,
       gameLogicFunction,
+      gameContractAddress,
+      roomProvider: transportProvider,
       Eth: this._Eth
     }
     const dapp = new DApp(dappParams)
+    self._params.events.emit("webapi::status", 1111)
     dapp.on("dapp::status", data => {
-      self.emit("webapi::status", data)
+      self._params.events.emit("webapi::status", data)
     })
     this._GameInstance = await dapp.startClient()
     this._GameInstance.on("instance::status", data => {
-      self.emit("webapi::status", { message: "event from instance", data })
+      self._params.events.emit("webapi::status", { message: "event from instance", data })
     })
-    this.emit("webapi::status", { message: "Game ready to connect", data: {} })
+    self._params.events.emit("webapi::status", { message: "Game ready to connect", data: {} })
     log.info(`Game ready to connect`)
   }
 
   async connect(params: ConnectParams): Promise<ConnectResult> {
-    this.emit("webapi::status", { message: "client try to connect", data: {} })
+    this._params.events.emit("webapi::status", { message: "client try to connect", data: {} })
     /** parse deposit and game data of method params */
-    const { playerDeposit, gameData } = params
+    const { playerDeposit } = params
 
     /** Start connect to the game */
-    const gameConnect = await this._GameInstance.connect({
-      playerDeposit,
-      gameData
-    })
+    const gameConnect = await this._GameInstance.connect({ playerDeposit })
 
     /** Check channel state */
     if (this._getChannelStatus(gameConnect.state) === "opened") {
-      this.emit("connectionResult", {
+      this._params.events.emit("connectionResult", {
         message: "connect to bankroller succefull"
       })
       log.info(`Channel  ${gameConnect.channelId} opened! Go to game!`)
@@ -150,12 +149,11 @@ export default class Game extends EventEmitter implements IGame {
 
   async play(params: PlayParams): Promise<PlayResult> {
     /** Parse params */
-    const { userBet, gameData, rndOpts } = params
+    const { userBets, gameData } = params
     /** Call play method */
     const callPlayResults = await this._GameInstance.play({
-      userBet,
-      gameData,
-      rndOpts
+      userBets,
+      gameData
     })
 
     /** Get state channel balances */

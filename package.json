@@ -1,13 +1,14 @@
 {
   "name": "dc-webapi",
-  "version": "0.1.11",
+  "version": "0.1.23",
   "main": "./lib/index.js",
   "license": "MIT",
   "scripts": {
     "build:ts": "npm-run-all typescript",
     "build": "npm-run-all typescript && node scripts/build.js",
     "clean": "rimraf lib",
-    "typescript": "tsc --build"
+    "typescript": "tsc --build",
+    "test:game": "mocha --timeout 99999999 -r ts-node/register src/__tests__/startGame.test.ts"
   },
   "devDependencies": {
     "chai": "^4.1.2",
@@ -16,12 +17,12 @@
   "dependencies": {
     "@types/node": "^10.11.7",
     "@types/web3": "^1.0.6",
-    "dc-configs": "^0.1.8",
-    "dc-core": "^0.1.7",
-    "dc-ethereum-utils": "^0.1.7",
-    "dc-logging": "^0.1.7",
-    "dc-messaging": "^0.1.7",
-    "node-fetch-polyfill": "^2.0.6"
+    "cross-fetch": "^2.0.6",
+    "dc-configs": "^0.1.23",
+    "dc-core": "^0.1.21",
+    "dc-ethereum-utils": "^0.1.15",
+    "dc-logging": "^0.1.15",
+    "dc-messaging": "^0.1.23"
   },
-  "gitHead": "865d20c921eb00208778bbdcbb47fe95c2b4ed38"
+  "gitHead": "3e5dcaecc303cdce6b606ab1fc570c530592eef4"
 }
