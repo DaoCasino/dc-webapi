@@ -106,21 +106,22 @@ export default class Game implements IGame {
       roomProvider: transportProvider,
       Eth: this._Eth
     }
+    
     const dapp = new DApp(dappParams)
-    self._params.events.emit("webapi::status", 1111)
+    self._params.eventEmitter.emit("webapi::status", 1111)
     dapp.on("dapp::status", data => {
-      self._params.events.emit("webapi::status", data)
+      self._params.eventEmitter.emit("webapi::status", data)
     })
     this._GameInstance = await dapp.startClient()
     this._GameInstance.on("instance::status", data => {
-      self._params.events.emit("webapi::status", { message: "event from instance", data })
+      self._params.eventEmitter.emit("webapi::status", { message: "event from instance", data })
     })
-    self._params.events.emit("webapi::status", { message: "Game ready to connect", data: {} })
+    self._params.eventEmitter.emit("webapi::status", { message: "Game ready to connect", data: {} })
     log.info(`Game ready to connect`)
   }
 
   async connect(params: ConnectParams): Promise<ConnectResult> {
-    this._params.events.emit("webapi::status", { message: "client try to connect", data: {} })
+    this._params.eventEmitter.emit("webapi::status", { message: "client try to connect", data: {} })
     /** parse deposit and game data of method params */
     const { playerDeposit } = params
 
@@ -129,7 +130,7 @@ export default class Game implements IGame {
 
     /** Check channel state */
     if (this._getChannelStatus(gameConnect.state) === "opened") {
-      this._params.events.emit("connectionResult", {
+      this._params.eventEmitter.emit("connectionResult", {
         message: "connect to bankroller succefull"
       })
       log.info(`Channel  ${gameConnect.channelId} opened! Go to game!`)
