@@ -72,16 +72,17 @@ const runPlay = async ({ game, account, balances }) => {
   game.stop()
 }
 describe("Bankroller Tests", () => {
-  it("game with remote bankroller in ropsten", async () => {
-    const { game, account, balances } = await startGame(
-      "ropsten",
-      'DC_CloudPlatform'
-      // os.hostname()
-    ) // TODO: hardcode!!!
-    await runPlay({ game, account, balances })
-  })
-  // it("game with remote bankroller in local", async () => {
-  //   const { game, account, balances } = await startGame("local", os.hostname())
+  // it("game with remote bankroller in ropsten", async () => {
+  //   const { game, account, balances } = await startGame(
+  //     "ropsten",
+  //     'DC_CloudPlatform'
+  //     // os.hostname()
+  //   ) // TODO: hardcode!!!
+
   //   await runPlay({ game, account, balances })
   // })
+  it("game with remote bankroller in local", async () => {
+    const { game, account, balances } = await startGame("local", os.hostname(), TransportType.IPFS)
+    await runPlay({ game, account, balances })
+  })
 })
