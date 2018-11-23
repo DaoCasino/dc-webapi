@@ -15,7 +15,7 @@ const logger = new Logger("Start Game test")
 const playerPrivateKeys = {
   ropsten: "0x6A5AE922FDE5C8EE877E9470F45B8030F60C19038E9116DB8B343782D9593602",
   rinkeby: "0x6A5AE922FDE5C8EE877E9470F45B8030F60C19038E9116DB8B343782D9593602",
-  local: "0xae6ae8e5ccbfb04590405997ee2d52d2b330726137b875053c36d94e974d162f"
+  local: "0xc87509a1c067bbde78beb793e6fa76530b6382a4c0241e5e4a9ec0a0f44dc0d3"
 }
 import gameManifest from "./FTE1/dapp.manifest"
 import Game from "../Game"
@@ -23,7 +23,7 @@ const globalGameStore = new GlobalGameLogicStore()
 ;(global as any).DCLib = globalGameStore
 
 // tslint:disable-next-line:no-var-requires
-require("./FTE1/dapp.logic")
+const gameLogicFunction = require("./FTE1/dapp.logic")
 
 const WALLET_PWD = "1234"
 
@@ -41,7 +41,7 @@ const startGame = async (
   const game = webapi.createGame({
     name: "DCGame_FTE_v1",
     gameContractAddress: gameManifest.getContract(blockchainNetwork).address,
-    gameLogicFunction: globalGameStore.getGameLogic("DCGame_FTE_v1"),
+    gameLogicFunction,
     rules: gameManifest.rules
   })
 
@@ -56,9 +56,11 @@ const runPlay = async ({ game, account, balances }) => {
   let betsBalance = balances.bet.balance
   for (let i = 0; i < 10; i++) {
     const res = await game.play({
-      userBet: 1,
-      gameData: [2],
-      rndOpts: [[1, 3]]
+      userBets: [1],
+      gameData: {
+        randomRanges: [[1, 3]],
+        custom: { playerNumbers: 2 }
+      }
     })
     betsBalance += res.profit
   }
@@ -68,15 +70,15 @@ const runPlay = async ({ game, account, balances }) => {
   game.stop()
 }
 describe("Bankroller Tests", () => {
-  it("game with remote bankroller in ropsten", async () => {
-    const { game, account, balances } = await startGame(
-      "ropsten",
-      os.hostname()
-    ) // TODO: hardcode!!!
-    await runPlay({ game, account, balances })
-  })
-  // it("game with remote bankroller in local", async () => {
-  //   const { game, account, balances } = await startGame("local", os.hostname())
+  // it("game with remote bankroller in ropsten", async () => {
+  //   const { game, account, balances } = await startGame(
+  //     "ropsten",
+  //     os.hostname()
+  //   ) // TODO: hardcode!!!
   //   await runPlay({ game, account, balances })
   // })
+  it("game with remote bankroller in local", async () => {
+    const { game, account, balances } = await startGame("local", os.hostname())
+    await runPlay({ game, account, balances })
+  })
 })
