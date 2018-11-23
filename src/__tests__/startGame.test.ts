@@ -15,7 +15,7 @@ const logger = new Logger("Start Game test")
 const playerPrivateKeys = {
   ropsten: "0x6A5AE922FDE5C8EE877E9470F45B8030F60C19038E9116DB8B343782D9593602",
   rinkeby: "0x6A5AE922FDE5C8EE877E9470F45B8030F60C19038E9116DB8B343782D9593602",
-  local: "0xae6ae8e5ccbfb04590405997ee2d52d2b330726137b875053c36d94e974d162f"
+  local: "0xc87509a1c067bbde78beb793e6fa76530b6382a4c0241e5e4a9ec0a0f44dc0d3"
 }
 import gameManifest from "./FTE1/dapp.manifest"
 import Game from "../Game"
@@ -70,15 +70,16 @@ const runPlay = async ({ game, account, balances }) => {
   game.stop()
 }
 describe("Bankroller Tests", () => {
-  // it("game with remote bankroller in ropsten", async () => {
-  //   const { game, account, balances } = await startGame(
-  //     "ropsten",
-  //     os.hostname()
-  //   ) // TODO: hardcode!!!
-  //   await runPlay({ game, account, balances })
-  // })
-  it("game with remote bankroller in local", async () => {
-    const { game, account, balances } = await startGame("local", os.hostname())
+  it("game with remote bankroller in ropsten", async () => {
+    const { game, account, balances } = await startGame(
+      "ropsten",
+      'DC_CloudPlatform'
+      // os.hostname()
+    ) // TODO: hardcode!!!
     await runPlay({ game, account, balances })
   })
+  // it("game with remote bankroller in local", async () => {
+  //   const { game, account, balances } = await startGame("local", os.hostname())
+  //   await runPlay({ game, account, balances })
+  // })
 })
