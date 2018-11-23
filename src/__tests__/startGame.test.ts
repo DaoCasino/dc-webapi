@@ -23,7 +23,7 @@ const globalGameStore = new GlobalGameLogicStore()
 ;(global as any).DCLib = globalGameStore
 
 // tslint:disable-next-line:no-var-requires
-require("./FTE1/dapp.logic")
+const gameLogicFunction = require("./FTE1/dapp.logic")
 
 const WALLET_PWD = "1234"
 
@@ -41,7 +41,7 @@ const startGame = async (
   const game = webapi.createGame({
     name: "DCGame_FTE_v1",
     gameContractAddress: gameManifest.getContract(blockchainNetwork).address,
-    gameLogicFunction: globalGameStore.getGameLogic("DCGame_FTE_v1"),
+    gameLogicFunction,
     rules: gameManifest.rules
   })
 
@@ -56,9 +56,11 @@ const runPlay = async ({ game, account, balances }) => {
   let betsBalance = balances.bet.balance
   for (let i = 0; i < 10; i++) {
     const res = await game.play({
-      userBet: 1,
-      gameData: [2],
-      rndOpts: [[1, 3]]
+      userBets: [1],
+      gameData: {
+        randomRanges: [[1, 3]],
+        custom: { playerNumbers: 2 }
+      }
     })
     betsBalance += res.profit
   }
