@@ -1,4 +1,4 @@
-import { BlockchainNetwork } from "dc-configs"
+import { BlockchainNetwork, TransportType } from "dc-configs"
 import os from "os"
 import { GlobalGameLogicStore } from "dc-core"
 
@@ -29,11 +29,13 @@ const WALLET_PWD = "1234"
 
 const startGame = async (
   blockchainNetwork: BlockchainNetwork,
-  platformId: string
+  platformId: string,
+  transport: TransportType = TransportType.IPFS
 ) => {
   const webapi = await new DCWebapi({
     blockchainNetwork,
-    platformId
+    platformId,
+    transport
   }).start()
   webapi.account.init(WALLET_PWD, playerPrivateKeys[blockchainNetwork])
   const balances = await webapi.account.getBalances()
