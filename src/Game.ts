@@ -106,7 +106,7 @@ export default class Game implements IGame {
       roomProvider: transportProvider,
       Eth: this._Eth
     }
-    
+
     const dapp = new DApp(dappParams)
     self._params.eventEmitter.emit("webapi::status", 1111)
     dapp.on("dapp::status", data => {
@@ -114,14 +114,23 @@ export default class Game implements IGame {
     })
     this._GameInstance = await dapp.startClient()
     this._GameInstance.on("instance::status", data => {
-      self._params.eventEmitter.emit("webapi::status", { message: "event from instance", data })
+      self._params.eventEmitter.emit("webapi::status", {
+        message: "event from instance",
+        data
+      })
     })
-    self._params.eventEmitter.emit("webapi::status", { message: "Game ready to connect", data: {} })
+    self._params.eventEmitter.emit("webapi::status", {
+      message: "Game ready to connect",
+      data: {}
+    })
     log.info(`Game ready to connect`)
   }
 
   async connect(params: ConnectParams): Promise<ConnectResult> {
-    this._params.eventEmitter.emit("webapi::status", { message: "client try to connect", data: {} })
+    this._params.eventEmitter.emit("webapi::status", {
+      message: "client try to connect",
+      data: {}
+    })
     /** parse deposit and game data of method params */
     const { playerDeposit } = params
 
@@ -164,6 +173,7 @@ export default class Game implements IGame {
     } = this._GameInstance.getChannelStateData().balance
 
     /** Generate results and return */
+    // TODO return all from callPlayResults
     const playResult: PlayResult = {
       params,
       profit: callPlayResults.profit,
@@ -171,6 +181,7 @@ export default class Game implements IGame {
         player: dec2bet(player),
         bankroller: dec2bet(bankroller)
       },
+      data: callPlayResults.data,
       randomNums: callPlayResults.randoms
     }
 
