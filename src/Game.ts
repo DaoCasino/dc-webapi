@@ -87,11 +87,15 @@ export default class Game implements IGame {
     const { gameLogicFunction, name, rules } = this._params
 
     let { gameContractAddress } = this._params
+
     if (
-      blockchainNetwork === "local" &&
-      gameContractAddress.indexOf("->") > -1
+      gameContractAddress.indexOf("->") > -1 &&
+      blockchainNetwork === "local"
     ) {
-      gameContractAddress = await fetch(gameContractAddress.split("->")[0])
+      const { web3HttpProviderUrl } = config.default
+      gameContractAddress = await fetch(
+        `${web3HttpProviderUrl}/${gameContractAddress.split("->")[0]}`
+      )
         .then(result => result.json())
         .then(result => result[gameContractAddress.split("->")[1]])
     }
