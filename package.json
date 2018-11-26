@@ -8,11 +8,13 @@
     "build": "npm-run-all typescript && node scripts/build.js",
     "clean": "rimraf lib",
     "typescript": "tsc --build",
-    "test:game": "mocha --timeout 99999999 -r ts-node/register src/__tests__/startGame.test.ts"
+    "test:game": "mocha --timeout 99999999 -r ts-node/register src/__tests__/startGame.test.ts",
+    "test:game2": "ts-node ./src/__tests__/game.ts"
   },
   "devDependencies": {
     "chai": "^4.1.2",
-    "mocha": "^5.2.0"
+    "mocha": "^5.2.0",
+    "ts-node": "^7.0.1"
   },
   "dependencies": {
     "@types/node": "^10.11.7",
