@@ -39,9 +39,9 @@ export default class Game implements IGame {
     return transportProvider
   }
 
-  // async _stopMessaging(): Promise<void> {
+  async _stopMessaging(): Promise<void> {
     // await IpfsTransportProvider.destroy()  // TODO: !!!!!!
-  // }
+  }
 
   /**
    * Matching channel state and
