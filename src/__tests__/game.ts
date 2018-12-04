@@ -45,7 +45,7 @@ const startGame = async (
     rules: gameManifest.rules
   })
 
-  await game.start()
+  await game.start({ playerDeposit: 10 })
   await game.connect({ playerDeposit: 10 })
 
   // const game = new DAppFactory(transportProvider).startClient({ name: "game1" , })
@@ -70,12 +70,17 @@ const runPlay = async ({ game, account, balances }) => {
   game.stop()
 }
 
-(async () => {
-    const network : BlockchainNetwork = process.env.DC_NETWORK as BlockchainNetwork || "local"
-    let transport = TransportType.DIRECT
-    if (process.env.DC_TRANSPORT && process.env.DC_TRANSPORT in TransportType) {
-      transport = TransportType[process.env.DC_TRANSPORT]
-    }
-    const { game, account, balances } = await startGame(network, os.hostname(), transport)
-    await runPlay({ game, account, balances })
-  })()
+;(async () => {
+  const network: BlockchainNetwork =
+    (process.env.DC_NETWORK as BlockchainNetwork) || "local"
+  let transport = TransportType.DIRECT
+  if (process.env.DC_TRANSPORT && process.env.DC_TRANSPORT in TransportType) {
+    transport = TransportType[process.env.DC_TRANSPORT]
+  }
+  const { game, account, balances } = await startGame(
+    network,
+    os.hostname(),
+    transport
+  )
+  await runPlay({ game, account, balances })
+})()
