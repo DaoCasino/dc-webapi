@@ -75,10 +75,18 @@ export default class Game implements IGame {
     return this._stopMessaging()
   }
 
-  async start(): Promise<void> {
+  async start(params: ConnectParams): Promise<void> {
+    const userBalance = await this._params.Eth.getBalances()
     if (typeof this._Eth.getAccount().address === "undefined") {
       throw new Error(
         "Account is not defined please create new account and start game again"
+      )
+    }
+    const { playerDeposit } = params
+
+    if (userBalance.bet.balance < playerDeposit) {
+      throw new Error(
+        "Insufficient BET funds on your account. Try to set up a lower deposit."
       )
     }
     const self = this

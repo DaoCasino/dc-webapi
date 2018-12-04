@@ -47,7 +47,7 @@ const startGame = async (
     rules: gameManifest.rules
   })
 
-  await game.start()
+  await game.start({ playerDeposit: 10 })
   await game.connect({ playerDeposit: 10 })
 
   // const game = new DAppFactory(transportProvider).startClient({ name: "game1" , })
@@ -61,7 +61,7 @@ const runPlay = async ({ game, account, balances }) => {
       userBets: [1],
       gameData: {
         randomRanges: [[1, 3]],
-        custom: { playerNumbers: { t:'uint256', v:[2] }  }
+        custom: { playerNumbers: { t: "uint256", v: [2] } }
       }
     })
     betsBalance += res.profit
@@ -82,7 +82,11 @@ describe("Bankroller Tests", () => {
   //   await runPlay({ game, account, balances })
   // })
   it("game with remote bankroller in local", async () => {
-    const { game, account, balances } = await startGame("local", os.hostname(), TransportType.IPFS)
+    const { game, account, balances } = await startGame(
+      "local",
+      os.hostname(),
+      TransportType.IPFS
+    )
     await runPlay({ game, account, balances })
   })
 })
