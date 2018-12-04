@@ -1,6 +1,6 @@
 {
   "name": "dc-webapi",
-  "version": "0.1.41",
+  "version": "0.1.42",
   "main": "./lib/index.js",
   "license": "MIT",
   "scripts": {
@@ -18,11 +18,11 @@
     "@types/node": "^10.11.7",
     "@types/web3": "^1.0.6",
     "cross-fetch": "^2.0.6",
-    "dc-configs": "^0.1.41",
-    "dc-core": "^0.1.41",
-    "dc-ethereum-utils": "^0.1.41",
-    "dc-logging": "^0.1.41",
-    "dc-messaging": "^0.1.41"
+    "dc-configs": "^0.1.42",
+    "dc-core": "^0.1.42",
+    "dc-ethereum-utils": "^0.1.42",
+    "dc-logging": "^0.1.42",
+    "dc-messaging": "^0.1.42"
   },
   "gitHead": "4c0c6a8bb67e875ae858600341ad2744f799c32e"
 }
