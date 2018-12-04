@@ -81,18 +81,11 @@ describe("Bankroller Tests", () => {
 
   //   await runPlay({ game, account, balances })
   // })
-  it("game with env params", async () => {
-    const network: BlockchainNetwork =
-      (process.env.DC_NETWORK as BlockchainNetwork) || "local"
-    let transport = TransportType.DIRECT
-    if (process.env.DC_TRANSPORT && process.env.DC_TRANSPORT in TransportType) {
-      transport = TransportType[process.env.DC_TRANSPORT]
-    }
-
+  it("game with remote bankroller in local", async () => {
     const { game, account, balances } = await startGame(
-      network,
+      "local",
       os.hostname(),
-      transport
+      TransportType.IPFS
     )
     await runPlay({ game, account, balances })
   })
