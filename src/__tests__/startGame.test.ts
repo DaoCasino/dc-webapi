@@ -61,7 +61,7 @@ const runPlay = async ({ game, account, balances }) => {
       userBets: [1],
       gameData: {
         randomRanges: [[1, 3]],
-        custom: { playerNumbers: 2 }
+        custom: { playerNumbers: { t:'uint256', v:[2] }  }
       }
     })
     betsBalance += res.profit
