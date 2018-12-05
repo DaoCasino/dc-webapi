@@ -49,7 +49,7 @@ export interface DisconnectResult extends ChannelResult {
 /** Interface for user call */
 export interface IGame {
   onGameEvent: (event: string, func: (data: any) => void) => void
-  start: () => Promise<void>
+  start: (params: ConnectParams) => Promise<void>
   connect: (params: ConnectParams) => Promise<ConnectResult>
   play: (params: PlayParams) => Promise<PlayResult>
   disconnect: () => Promise<DisconnectResult>
