@@ -120,7 +120,6 @@ export default class Game implements IGame {
     }
 
     const dapp = new DApp(dappParams)
-    self._params.eventEmitter.emit("webapi::status", 1111)
     dapp.on("dapp::status", data => {
       self._params.eventEmitter.emit("webapi::status", data)
     })
