@@ -1,18 +1,20 @@
-DCLib.defineDAppLogic("DCGame_FTE_v1", function() {
+module.exports = function () {
   return {
-    play: function(userBet, gameData, randoms) {
-      const userNum = gameData[0]
-      const randomNum = randoms[0]
+    play: function (userBets, gameData, randoms) {
+      const USER_BET = userBets[0]
+      const USER_NUM = gameData.custom.playerNumbers[0]
+      const RANDOM_NUM = randoms[0]
 
-      let profit = -userBet
-
-      // if user win
-      if (userNum * 1 === randomNum * 1) {
-        profit = userBet * 2
+      let profit = -USER_BET
+      if (USER_NUM == RANDOM_NUM) {
+        profit = USER_BET * 2
       }
 
-      // return player profit
-      return profit
+      return {
+        profit,
+        data: null
+      }
     }
   }
-})
+}
+

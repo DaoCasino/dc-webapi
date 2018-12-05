@@ -75,10 +75,18 @@ export default class Game implements IGame {
     return this._stopMessaging()
   }
 
-  async start(): Promise<void> {
+  async start(params: ConnectParams): Promise<void> {
+    const userBalance = await this._params.Eth.getBalances()
     if (typeof this._Eth.getAccount().address === "undefined") {
       throw new Error(
         "Account is not defined please create new account and start game again"
+      )
+    }
+    const { playerDeposit } = params
+
+    if (userBalance.bet.balance < playerDeposit) {
+      throw new Error(
+        "Insufficient BET funds on your account. Try to set up a lower deposit."
       )
     }
     const self = this
@@ -87,11 +95,15 @@ export default class Game implements IGame {
     const { gameLogicFunction, name, rules } = this._params
 
     let { gameContractAddress } = this._params
+
     if (
       blockchainNetwork === "local" &&
       gameContractAddress.indexOf("->") > -1
     ) {
-      gameContractAddress = await fetch(gameContractAddress.split("->")[0])
+      const { web3HttpProviderUrl } = config.default
+      gameContractAddress = await fetch(
+        `${web3HttpProviderUrl}/${gameContractAddress.split("->")[0]}`
+      )
         .then(result => result.json())
         .then(result => result[gameContractAddress.split("->")[1]])
     }
@@ -106,21 +118,30 @@ export default class Game implements IGame {
       roomProvider: transportProvider,
       Eth: this._Eth
     }
+
     const dapp = new DApp(dappParams)
-    self._params.events.emit("webapi::status", 1111)
     dapp.on("dapp::status", data => {
-      self._params.events.emit("webapi::status", data)
+      self._params.eventEmitter.emit("webapi::status", data)
     })
     this._GameInstance = await dapp.startClient()
     this._GameInstance.on("instance::status", data => {
-      self._params.events.emit("webapi::status", { message: "event from instance", data })
+      self._params.eventEmitter.emit("webapi::status", {
+        message: "event from instance",
+        data
+      })
     })
-    self._params.events.emit("webapi::status", { message: "Game ready to connect", data: {} })
+    self._params.eventEmitter.emit("webapi::status", {
+      message: "Game ready to connect",
+      data: {}
+    })
     log.info(`Game ready to connect`)
   }
 
   async connect(params: ConnectParams): Promise<ConnectResult> {
-    this._params.events.emit("webapi::status", { message: "client try to connect", data: {} })
+    this._params.eventEmitter.emit("webapi::status", {
+      message: "client try to connect",
+      data: {}
+    })
     /** parse deposit and game data of method params */
     const { playerDeposit } = params
 
@@ -129,7 +150,7 @@ export default class Game implements IGame {
 
     /** Check channel state */
     if (this._getChannelStatus(gameConnect.state) === "opened") {
-      this._params.events.emit("connectionResult", {
+      this._params.eventEmitter.emit("connectionResult", {
         message: "connect to bankroller succefull"
       })
       log.info(`Channel  ${gameConnect.channelId} opened! Go to game!`)
@@ -163,6 +184,7 @@ export default class Game implements IGame {
     } = this._GameInstance.getChannelStateData().balance
 
     /** Generate results and return */
+    // TODO return all from callPlayResults
     const playResult: PlayResult = {
       params,
       profit: callPlayResults.profit,
@@ -170,6 +192,7 @@ export default class Game implements IGame {
         player: dec2bet(player),
         bankroller: dec2bet(bankroller)
       },
+      data: callPlayResults.data,
       randomNums: callPlayResults.randoms
     }
 

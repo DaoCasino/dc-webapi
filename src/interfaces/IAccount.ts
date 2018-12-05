@@ -6,7 +6,7 @@ import { EventEmitter } from 'events'
 export interface InitAccountParams {
   ETH: Eth
   config: IConfig,
-  events: EventEmitter
+  eventEmitter: EventEmitter
 }
 
 export interface AccountInstance {

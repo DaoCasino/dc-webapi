@@ -11,8 +11,8 @@ export interface CreateGameParams {
 
 export interface InitGameParams extends CreateGameParams {
   Eth: ETHInstance
-  config: IConfig,
-  events: EventEmitter
+  config: IConfig
+  eventEmitter: EventEmitter
 }
 
 interface GameBalances {
@@ -38,6 +38,7 @@ export interface PlayResult {
   randomNums: number[]
   params: PlayParams
   balances: GameBalances
+  data?: any
 }
 
 /** Interface for return disconnect game fucn */
@@ -47,11 +48,8 @@ export interface DisconnectResult extends ChannelResult {
 
 /** Interface for user call */
 export interface IGame {
-  onGameEvent: (
-    event: string,
-    func: (data: any) => void
-  ) => void
-  start: () => Promise<void>
+  onGameEvent: (event: string, func: (data: any) => void) => void
+  start: (params: ConnectParams) => Promise<void>
   connect: (params: ConnectParams) => Promise<ConnectResult>
   play: (params: PlayParams) => Promise<PlayResult>
   disconnect: () => Promise<DisconnectResult>
