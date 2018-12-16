@@ -6,9 +6,9 @@ export interface ActionData {
 }
 
 export interface WebapiInstance {
-  createGame: (params: CreateGameParams) => IGame
-  on(
+  on: (
     eventName: string,
-    func: (data: any) => void
-  ): void
+    eventHandler: (data: any) => void
+  ) => void
+  // createGame: (params: CreateGameParams) => IGame
 }

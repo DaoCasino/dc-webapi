@@ -9,8 +9,7 @@ const log = new Logger("Account:")
 export default class Account implements AccountInstance {
   private _params: InitAccountParams
   private _configuration: IConfig
-  
-  public address: string
+  private _address: string
   
   /** Actions events */
   public LOADED_ACTION: string = 'DC_ACCOUNT_INSTANCE_LOADED'
@@ -72,7 +71,7 @@ export default class Account implements AccountInstance {
     return this._params.ETH
   }
 
-  init(walletPassword: string, privateKeytoCreate?: string): void {
+  init(walletPassword: string, privateKeytoCreate: string): void {
     /**
      * Check wallet password exist in params
      * if exist not then throw error
@@ -82,50 +81,29 @@ export default class Account implements AccountInstance {
     }
 
     /**
-     * Check local storage wallet exist
-     * if wallet exist then load wallet
-     */
-    if (
-      typeof localStorage !== "undefined" &&
-      localStorage.getItem(this._configuration.walletName)
-    ) {
-      this._params.ETH.loadWallet(walletPassword)
-    }
-
-    /**
-     * Check exist wallet accounts
-     * if account exist then set variable
-     * on account private key in wallet first account
-     * then set on private key in params
-     */
-    const wallet = this._params.ETH.getWalletAccount()
-    const privateKey =
-      typeof wallet !== "undefined" ? wallet.privateKey : privateKeytoCreate
-
-    /**
      * Check exist private key
      * if private key not exist then
      * throw error
      */
-    if (typeof privateKey === "undefined") {
+    if (typeof privateKeytoCreate === "undefined") {
       throw new Error("privateKey is not define")
     }
 
     /** Init account in Eth instance */
-    this._params.ETH.initAccount(privateKey)
+    this._params.ETH.initAccount(privateKeytoCreate)
 
     /**
      * Add and Encrypt wallet with password in params
      * and save in localStorage with walletName
      * in config
      */
-    this._params.ETH.saveWallet(privateKey, walletPassword)
+    this._params.ETH.saveWallet(privateKeytoCreate, walletPassword)
 
     /** Save address */
-    this.address = add0x(this._params.ETH.getAccount().address)
+    this._address = add0x(this._params.ETH.getAccount().address)
     /** Emit created account event */
-    this._params.eventEmitter.emit(this.GET_ACCOUNT_INFO, this.address)
-    log.info(`Account ${this.address} created`)
+    // this._params.eventEmitter.emit(this.GET_ACCOUNT_INFO, this._address)
+    log.info(`Account ${this._address} created`)
   }
 
   getAddress(): string {
@@ -133,8 +111,8 @@ export default class Account implements AccountInstance {
      * If localstorage wallet not exist
      * then return local address
      */
-    if (typeof this.address !== "undefined") {
-      return this.address
+    if (typeof this._address !== "undefined") {
+      return this._address
     }
 
     /**

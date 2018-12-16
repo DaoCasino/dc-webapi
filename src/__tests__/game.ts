@@ -22,36 +22,34 @@ const globalGameStore = new GlobalGameLogicStore()
 
 // tslint:disable-next-line:no-var-requires
 const gameLogicFunction = require("./FTE1/dapp.logic")
-
 const WALLET_PWD = "1234"
 
-const startGame = async (
+const startGame = (
   blockchainNetwork: BlockchainNetwork = "local",
   platformId: string,
   transport: TransportType = TransportType.DIRECT
-) => {
-  const webapi = await new DCWebapi({
-    blockchainNetwork,
-    platformId,
-    transport
-  }).start()
-  webapi.account.init(WALLET_PWD, playerPrivateKeys[blockchainNetwork])
-  const balances = await webapi.account.getBalances()
+): Promise<any> => {
+  return new Promise((resolve, reject) => {
+    new DCWebapi({
+      blockchainNetwork,
+      platformId,
+      privateKey: playerPrivateKeys.local,
+      transport
+    }).on('ready', async instance => {
+      const balances = await instance.account.getBalances()
+      await instance.game.createGame({
+        name: "DCGame_FTE_v1",
+        gameContractAddress: gameManifest.getContract(blockchainNetwork).address,
+        gameLogicFunction,
+        rules: gameManifest.rules
+      })
 
-  const game = webapi.createGame({
-    name: "DCGame_FTE_v1",
-    gameContractAddress: gameManifest.getContract(blockchainNetwork).address,
-    gameLogicFunction,
-    rules: gameManifest.rules
+      await instance.game.connect({ playerDeposit: 10 })
+      resolve({ game: instance.game, account: instance.account, balances })
+    })
   })
-
-  await game.start({ playerDeposit: 10 })
-  await game.connect({ playerDeposit: 10 })
-
-  // const game = new DAppFactory(transportProvider).startClient({ name: "game1" , })
-
-  return { game, account: webapi.account, balances }
 }
+
 const runPlay = async ({ game, account, balances }) => {
   let betsBalance = balances.bet.balance
   for (let i = 0; i < 10; i++) {
@@ -73,14 +71,18 @@ const runPlay = async ({ game, account, balances }) => {
 ;(async () => {
   const network: BlockchainNetwork =
     (process.env.DC_NETWORK as BlockchainNetwork) || "local"
-  let transport = TransportType.DIRECT
+  let transport = TransportType.IPFS
   if (process.env.DC_TRANSPORT && process.env.DC_TRANSPORT in TransportType) {
     transport = TransportType[process.env.DC_TRANSPORT]
   }
-  const { game, account, balances } = await startGame(
-    network,
-    os.hostname(),
-    transport
-  )
-  await runPlay({ game, account, balances })
+  try {
+    const { game, account, balances } = await startGame(
+      network,
+      os.hostname(),
+      transport
+    )
+    await runPlay({ game, account, balances })
+  } catch (error) {
+    logger.error(error)
+  }
 })()
