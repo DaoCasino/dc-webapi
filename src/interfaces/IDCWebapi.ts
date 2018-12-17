@@ -1,14 +1,19 @@
 import { IGame, CreateGameParams } from "./IGame"
+import { AccountInstance } from './IAccount'
 
 export interface ActionData {
   action: string
   data: any
 }
 
+export interface ReadyInstnce {
+  game: IGame,
+  account: AccountInstance
+}
 export interface WebapiInstance {
-  createGame: (params: CreateGameParams) => IGame
-  on(
+  on: (
     eventName: string,
-    func: (data: any) => void
-  ): void
+    eventHandler: (data: any) => void
+  ) => void
+  init: () => Promise<ReadyInstnce>
 }
