@@ -114,7 +114,6 @@ export default class Account implements AccountInstance {
     if (typeof this._address !== "undefined") {
       return this._address
     }
-
     /**
      * Check local storage on exist wallet
      * with wallet name in config.default if exist = true
@@ -139,6 +138,7 @@ export default class Account implements AccountInstance {
     if (typeof localStorage === "undefined") {
       return this._params.ETH.getWalletAccount().privateKey
     }
+    
     if (!localStorage.getItem(this._configuration.walletName)) {
       throw new Error(`
         Not wallet with name: ${this._configuration.walletName}
@@ -148,7 +148,6 @@ export default class Account implements AccountInstance {
 
     /** Get wallet and decrypt in localStorage */
     this._params.ETH.loadWallet(walletPassword)
-
     /** Return private key */
     return this._params.ETH.getWalletAccount().privateKey
   }
@@ -156,7 +155,6 @@ export default class Account implements AccountInstance {
   async getBalances(): Promise<LastBalances> {
     /** Get account address */
     const accountAddress: string = this.getAddress()
-
     /** Get and return ethereum and bet token balance on account */
     const { eth, bet } = await this._params.ETH.getBalances(accountAddress)
     return { eth, bet }

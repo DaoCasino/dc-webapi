@@ -10,4 +10,8 @@ export interface ApiEventsParams {
 
 export interface ApiEventsInstance extends EventEmitter {
   listenAll: (eventData: ActionData) => Promise<void>
+  crossEmit: (
+    eventName: string,
+    eventData: any
+  ) => void
 }

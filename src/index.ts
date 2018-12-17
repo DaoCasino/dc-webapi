@@ -24,7 +24,10 @@ export default class DCWebapi implements WebapiInstance {
   public account: AccountInstance
   public game: IGame
 
-  constructor(initParams?: IConfigOptions) {
+  constructor(
+    initParams?: IConfigOptions,
+    callback?: (instance: DCWebapi) => void
+  ) {
     if (typeof initParams !== 'undefined') {
       this.initParams = initParams
     }
@@ -36,6 +39,10 @@ export default class DCWebapi implements WebapiInstance {
       isBrowser: this.isBrowser,
       isIframe: this.isIframe
     })
+
+    if (callback) {
+      this.on('ready', callback)
+    }
   }
 
   on(
@@ -49,13 +56,15 @@ export default class DCWebapi implements WebapiInstance {
   }
 
   private configurateParams() {
-    this.on('PARAMS_READY', async () => {
+    this.on('paramsReady', async () => {
       await this.webapiStart()
     })
     
     if (!this.isIframe && typeof this.initParams !== 'undefined') {
       setDefaultConfig(this.initParams)
-      this.ApiEvents.emit('PARAMS_READY', null)
+      this.ApiEvents.emit('paramsReady', null)
+    } else {
+      this.ApiEvents.crossEmit('getParams', null)
     }
   }
 

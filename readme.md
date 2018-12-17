@@ -9,4 +9,31 @@ webapi.on('ready', async instance => {
   await instance.game.disconnect()
 })
 ```
-The ``start()`` function is specified in the **index.ts**. Parameters (params) come from the **Game** value specified in **Game.ts**.
+
+## Example
+
+```javascript
+new DCWebapi({
+  platformId 'example_id',
+  blockchainNetwork: 'local',
+  privateKey: 'your_private_key'
+}).on('ready', async instance => {
+  await instance.game.createGame({
+    name: manifest.slug,
+    gameContractAddress: manifest.getContract(blockchainNetwork).address,
+    gameLogicFunction: dapp_logic,
+    rules: manifest.rules
+  })
+
+  await instance.game.connect({ playerDeposit: deposit })
+  await instance.game.play({
+    userBets: [ betAmount ],
+    gameData: {
+      randomRanges: [ randomRange ],
+      custom: { playerNumbers: { t: 'uint256', v: [ userNum ] } }
+    }
+  })
+
+  await instance.game.disconnect()
+})
+```

@@ -30,18 +30,33 @@ export default class ApiEvents extends EventEmitter implements ApiEventsInstance
   eventNames () {
     return [
       'ready',
-      'COMPLEATE_HANDLER',
-      'CHANGE_DEFAULT_CONFIG',
-      'PARAMS_READY',
-      'LISTEN_ALL'
+      'listenAll',
+      'getParams',
+      'paramsReady',
+      'compleateHandler',
+      'changeDefaultConfig'
     ]
+  }
+
+  crossEmit(
+    eventName: string,
+    eventData: any
+  ): void {
+    if (this.params.isIframe) {
+      window.top.postMessage({
+        action: eventName,
+        data: eventData
+      }, '*')
+    }
+
+    this.emit(eventName, eventData)
   }
 
   async listenAll(eventData: ActionData) {
     switch (eventData.action) {
-      case 'CHANGE_DEFAULT_CONFIG':
+      case 'changeDefaultConfig':
         setDefaultConfig(eventData.data)
-        this.emit('PARAMS_READY', null)
+        this.emit('paramsReady', null)
     }
   }
 }
