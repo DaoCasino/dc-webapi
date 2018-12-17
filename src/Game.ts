@@ -1,5 +1,6 @@
 import {
   DApp,
+  IDApp,
   DAppParams,
   PlayParams,
   ConnectParams,
@@ -9,8 +10,9 @@ import {
   IGame,
   PlayResult,
   ConnectResult,
-  InitGameParams,
-  DisconnectResult
+  DisconnectResult,
+  CreateGameParams,
+  InitGameInstanceParams,
 } from "./interfaces/IGame"
 import { Logger } from "@daocasino/dc-logging"
 import { IConfig, config } from "@daocasino/dc-configs"
@@ -20,26 +22,26 @@ import fetch from "cross-fetch"
 const log = new Logger("Game:")
 
 export default class Game implements IGame {
-  private _Eth: ETHInstance
-  private _params: InitGameParams
-  private _GameInstance: IDAppPlayerInstance
+  private ETH: ETHInstance
+  private params: InitGameInstanceParams
+  private GameInstance: IDAppPlayerInstance
+  private DApp: IDApp
   public configuration: IConfig
 
-  constructor(params: InitGameParams) {
-    this._params = params
-    this._Eth = this._params.Eth
+  constructor(params: InitGameInstanceParams) {
+    this.params = params
+    this.ETH = this.params.Eth
     this.configuration = params.config
-    log.info(`Game ${this._params.name} created!`)
   }
 
   /** Create and return messaging provider */
-  async _initMessaging(): Promise<IMessagingProvider> {
+  private async initMessaging(): Promise<IMessagingProvider> {
     const factory = new TransportProviderFactory()
     const transportProvider = await factory.create()
     return transportProvider
   }
 
-  async _stopMessaging(): Promise<void> {
+  private async stopMessaging(): Promise<void> {
     // await IpfsTransportProvider.destroy()  // TODO: !!!!!!
   }
 
@@ -48,7 +50,7 @@ export default class Game implements IGame {
    * return channel status in readable
    * the form
    */
-  _getChannelStatus(channelState: string): string {
+  private getChannelStatus(channelState: string): string {
     switch (channelState) {
       case "0":
         return "unused"
@@ -64,37 +66,20 @@ export default class Game implements IGame {
   }
 
   onGameEvent(event: string, func: (data: any) => void) {
-    this._GameInstance.on(event, func)
-  }
-
-  getGameContractAddress(): string {
-    return this._params.gameContractAddress
+    this.GameInstance.on(event, func)
   }
 
   async stop(): Promise<void> {
-    return this._stopMessaging()
+    return this.stopMessaging()
   }
 
-  async start(params: ConnectParams): Promise<void> {
-    const userBalance = await this._params.Eth.getBalances()
-    if (typeof this._Eth.getAccount().address === "undefined") {
-      throw new Error(
-        "Account is not defined please create new account and start game again"
-      )
-    }
-    const { playerDeposit } = params
-
-    if (userBalance.bet.balance < playerDeposit) {
-      throw new Error(
-        "Insufficient BET funds on your account. Try to set up a lower deposit."
-      )
-    }
+  async createGame(createGameParams: CreateGameParams): Promise<void> {
     const self = this
-    const transportProvider = await this._initMessaging()
+    const transportProvider = await this.initMessaging()
     const { platformId, blockchainNetwork } = this.configuration
-    const { gameLogicFunction, name, rules } = this._params
+    const { gameLogicFunction, name, rules } = createGameParams
 
-    let { gameContractAddress } = this._params
+    let { gameContractAddress } = createGameParams
 
     if (
       blockchainNetwork === "local" &&
@@ -116,48 +101,58 @@ export default class Game implements IGame {
       gameLogicFunction,
       gameContractAddress,
       roomProvider: transportProvider,
-      Eth: this._Eth
+      Eth: this.ETH
     }
 
-    const dapp = new DApp(dappParams)
-    dapp.on("dapp::status", data => {
-      self._params.eventEmitter.emit("webapi::status", data)
+    this.DApp = new DApp(dappParams)
+    this.DApp.on("dapp::status", data => {
+      self.params.eventEmitter.emit("webapi::status", data)
     })
-    this._GameInstance = await dapp.startClient()
-    this._GameInstance.on("instance::status", data => {
-      self._params.eventEmitter.emit("webapi::status", {
+    log.info(`DApp ${createGameParams.name} created!`)
+  }
+  
+  async connect(params: ConnectParams): Promise<ConnectResult> {
+    if (typeof this.ETH.getAccount().address === "undefined") {
+      throw new Error(
+        "Account is not defined please create new account and start game again"
+      )
+    }
+
+    const userBalance = await this.ETH.getBalances()
+    const { playerDeposit } = params
+    if (userBalance.bet.balance < playerDeposit) {
+      throw new Error(
+        "Insufficient BET funds on your account. Try to set up a lower deposit."
+      )
+    }
+
+    const self = this
+    this.GameInstance = await this.DApp.startClient()
+    this.GameInstance.on("instance::status", data => {
+      self.params.eventEmitter.emit("webapi::status", {
         message: "event from instance",
         data
       })
     })
-    self._params.eventEmitter.emit("webapi::status", {
-      message: "Game ready to connect",
-      data: {}
-    })
-    log.info(`Game ready to connect`)
-  }
-
-  async connect(params: ConnectParams): Promise<ConnectResult> {
-    this._params.eventEmitter.emit("webapi::status", {
+    
+    this.params.eventEmitter.emit("webapi::status", {
       message: "client try to connect",
       data: {}
     })
-    /** parse deposit and game data of method params */
-    const { playerDeposit } = params
 
     /** Start connect to the game */
-    const gameConnect = await this._GameInstance.connect({ playerDeposit })
+    const gameConnect = await this.GameInstance.connect({ playerDeposit })
 
     /** Check channel state */
-    if (this._getChannelStatus(gameConnect.state) === "opened") {
-      this._params.eventEmitter.emit("connectionResult", {
+    if (this.getChannelStatus(gameConnect.state) === "opened") {
+      this.params.eventEmitter.emit("connectionResult", {
         message: "connect to bankroller succefull"
       })
       log.info(`Channel  ${gameConnect.channelId} opened! Go to game!`)
       /** Generate and return data for connected results */
       return {
         channelID: gameConnect.channelId,
-        channelState: this._getChannelStatus(gameConnect.state),
+        channelState: this.getChannelStatus(gameConnect.state),
         dealerAddress: gameConnect.bankrollerAddress,
         playerAddress: gameConnect.playerAddress,
         channelBalances: {
@@ -172,7 +167,7 @@ export default class Game implements IGame {
     /** Parse params */
     const { userBets, gameData } = params
     /** Call play method */
-    const callPlayResults = await this._GameInstance.play({
+    const callPlayResults = await this.GameInstance.play({
       userBets,
       gameData
     })
@@ -181,7 +176,7 @@ export default class Game implements IGame {
     const {
       player,
       bankroller
-    } = this._GameInstance.getChannelStateData().balance
+    } = this.GameInstance.getChannelStateData().balance
 
     /** Generate results and return */
     // TODO return all from callPlayResults
@@ -201,15 +196,15 @@ export default class Game implements IGame {
 
   async disconnect(): Promise<DisconnectResult> {
     /** Start game disconnect */
-    const gameDisconnect = await this._GameInstance.disconnect()
+    const gameDisconnect = await this.GameInstance.disconnect()
 
     /** Check channel state */
-    if (this._getChannelStatus(gameDisconnect.state) === "closed") {
+    if (this.getChannelStatus(gameDisconnect.state) === "closed") {
       log.info(`Channel ${gameDisconnect._id} closed and Game Over`)
       /** Generate and return data for connected results */
       return {
         channelID: gameDisconnect._id,
-        channelState: this._getChannelStatus(gameDisconnect.state),
+        channelState: this.getChannelStatus(gameDisconnect.state),
         resultBalances: {
           bankroller: dec2bet(gameDisconnect._bankrollerBalance),
           player: dec2bet(gameDisconnect._playerBalance)
