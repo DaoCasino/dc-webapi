@@ -49,6 +49,11 @@ export default class DCWebapi implements WebapiInstance {
     eventName: string,
     eventHandler: (data: any) => void
   ) {
+    if (this.ApiEvents.listenerCount(eventName) >= 1) {
+      log.warn(`Dublicate listener with name: ${eventName}`)
+      return
+    }
+
     this.ApiEvents.on(eventName, eventHandler)
     if (eventName === 'ready') {
       this.configurateParams()
@@ -100,7 +105,7 @@ export default class DCWebapi implements WebapiInstance {
       config.default.standartWalletPass,
       config.default.privateKey
     )
-
+    
     this.ApiEvents.emit('ready', this)
   }  
 }

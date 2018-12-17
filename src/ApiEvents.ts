@@ -19,8 +19,9 @@ export default class ApiEvents extends EventEmitter implements ApiEventsInstance
 
     if (this.params.isIframe) {
       window.addEventListener(
-        'message',
-        event => this.listenAll(event.data), false
+        'message', event => {
+          this.listenAll(event.data)
+        }, false
       )
 
       log.info('Webapi start in iFrame')
