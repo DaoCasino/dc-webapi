@@ -4,7 +4,7 @@ import {
   PlayParams,
   ConnectParams,
   IDAppPlayerInstance
-} from "dc-core"
+} from "@daocasino/dc-core"
 import {
   IGame,
   PlayResult,
@@ -12,10 +12,10 @@ import {
   InitGameParams,
   DisconnectResult
 } from "./interfaces/IGame"
-import { Logger } from "dc-logging"
-import { IConfig, config } from "dc-configs"
-import { dec2bet, ETHInstance } from "dc-ethereum-utils"
-import { TransportProviderFactory, IMessagingProvider } from "dc-messaging"
+import { Logger } from "@daocasino/dc-logging"
+import { IConfig, config } from "@daocasino/dc-configs"
+import { dec2bet, ETHInstance } from "@daocasino/dc-ethereum-utils"
+import { TransportProviderFactory, IMessagingProvider } from "@daocasino/dc-messaging"
 import fetch from "cross-fetch"
 const log = new Logger("Game:")
 

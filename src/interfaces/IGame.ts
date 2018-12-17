@@ -1,6 +1,6 @@
-import { IConfig } from "dc-configs"
-import { ETHInstance } from "dc-ethereum-utils"
-import { PlayParams, IGameLogic, ConnectParams } from "dc-core"
+import { IConfig } from "@daocasino/dc-configs"
+import { ETHInstance } from "@daocasino/dc-ethereum-utils"
+import { PlayParams, IGameLogic, ConnectParams } from "@daocasino/dc-core"
 import { EventEmitter } from "events"
 export interface CreateGameParams {
   name: string

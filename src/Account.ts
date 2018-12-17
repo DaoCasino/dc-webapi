@@ -1,6 +1,6 @@
-import { Logger } from "dc-logging"
-import { IConfig, config } from 'dc-configs'
-import { Eth, LastBalances, add0x } from "dc-ethereum-utils"
+import { Logger } from "@daocasino/dc-logging"
+import { IConfig, config } from '@daocasino/dc-configs'
+import { Eth, LastBalances, add0x } from "@daocasino/dc-ethereum-utils"
 import { AccountInstance, InitAccountParams } from "./interfaces/IAccount"
 import { ActionData } from './interfaces/IDCWebapi'
 
@@ -67,7 +67,7 @@ export default class Account implements AccountInstance {
     }
   }
 
-  /** Get dc-ethereum-utils instance */
+  /** Get @daocasino/dc-ethereum-utils instance */
   getEthInstance(): Eth {
     return this._params.ETH
   }

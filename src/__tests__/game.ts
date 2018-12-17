@@ -1,8 +1,8 @@
-import { BlockchainNetwork, TransportType } from "dc-configs"
+import { BlockchainNetwork, TransportType } from "@daocasino/dc-configs"
 import os from "os"
-import { GlobalGameLogicStore } from "dc-core"
+import { GlobalGameLogicStore } from "@daocasino/dc-core"
 
-import { Logger } from "dc-logging"
+import { Logger } from "@daocasino/dc-logging"
 
 // tslint:disable-next-line:no-implicit-dependencies
 import { describe, it, Test } from "mocha"
