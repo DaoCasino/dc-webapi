@@ -2,11 +2,11 @@ import Game from "./Game"
 import Account from "./Account"
 import ApiEvents from './ApiEvents'
 import {
-  ApiEventsInstance,
-  CreateGameParams,
-  AccountInstance,
+  IGame,
+  ReadyInstnce,
   WebapiInstance,
-  IGame
+  AccountInstance,
+  ApiEventsInstance
 } from "./interfaces"
 import { Eth } from "@daocasino/dc-ethereum-utils"
 import { Logger } from '@daocasino/dc-logging'
@@ -28,10 +28,7 @@ export default class DCWebapi implements WebapiInstance {
     initParams?: IConfigOptions,
     callback?: (instance: DCWebapi) => void
   ) {
-    if (typeof initParams !== 'undefined') {
-      this.initParams = initParams
-    }
-
+    this.initParams = initParams
     this.isBrowser = (typeof window !== 'undefined')
     this.isIframe = (this.isBrowser && window.self !== window.top)
 
@@ -71,6 +68,21 @@ export default class DCWebapi implements WebapiInstance {
     } else {
       this.ApiEvents.crossEmit('getParams', null)
     }
+  }
+
+  init(): Promise<ReadyInstnce> {
+    return new Promise((resolve, reject) => {
+      this.on('ready', instance => {
+        resolve({
+          game: instance.game,
+          account: instance.account
+        })
+      })
+
+      setTimeout(() => {
+        reject(new Error('timeout ready event'))
+      }, 10000)
+    })
   }
 
   private async webapiStart(): Promise<void> {
