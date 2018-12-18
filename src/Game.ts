@@ -27,6 +27,7 @@ export default class Game implements IGame {
   private GameInstance: IDAppPlayerInstance
   private DApp: IDApp
   public configuration: IConfig
+  private transportProvider: IMessagingProvider
 
   constructor(params: InitGameInstanceParams) {
     this.params = params
@@ -35,13 +36,13 @@ export default class Game implements IGame {
   }
 
   /** Create and return messaging provider */
-  private async initMessaging(): Promise<IMessagingProvider> {
+  private initMessaging(): Promise<IMessagingProvider> {
     const factory = new TransportProviderFactory()
-    const transportProvider = await factory.create()
-    return transportProvider
+    return factory.create()
   }
 
-  private async stopMessaging(): Promise<void> {
+  private stopMessaging(): Promise<void> {
+    return this.transportProvider.destroy()
     // await IpfsTransportProvider.destroy()  // TODO: !!!!!!
   }
 
@@ -75,7 +76,8 @@ export default class Game implements IGame {
 
   async createGame(createGameParams: CreateGameParams): Promise<void> {
     const self = this
-    const transportProvider = await this.initMessaging()
+    this.transportProvider = await this.initMessaging()
+
     const { platformId, blockchainNetwork } = this.configuration
     const { gameLogicFunction, name, rules } = createGameParams
 
@@ -100,7 +102,7 @@ export default class Game implements IGame {
       blockchainNetwork,
       gameLogicFunction,
       gameContractAddress,
-      roomProvider: transportProvider,
+      roomProvider: this.transportProvider,
       Eth: this.ETH
     }
 
