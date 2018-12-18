@@ -37,13 +37,11 @@ export default class Game implements IGame {
 
   /** Create and return messaging provider */
   private initMessaging(): Promise<IMessagingProvider> {
-    const factory = new TransportProviderFactory()
-    return factory.create()
+    return (new TransportProviderFactory).create()
   }
 
   private stopMessaging(): Promise<void> {
     return this.transportProvider.destroy()
-    // await IpfsTransportProvider.destroy()  // TODO: !!!!!!
   }
 
   /**
