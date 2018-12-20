@@ -1,6 +1,7 @@
 import { Logger } from "@daocasino/dc-logging"
 import { IConfig, config } from '@daocasino/dc-configs'
-import { Eth, LastBalances, add0x } from "@daocasino/dc-ethereum-utils"
+import { Eth, add0x } from "@daocasino/dc-ethereum-utils"
+import { LastBalances } from "@daocasino/dc-blockchain-types"
 import { AccountInstance, InitAccountParams } from "./interfaces/IAccount"
 import { ActionData } from './interfaces/IDCWebapi'
 

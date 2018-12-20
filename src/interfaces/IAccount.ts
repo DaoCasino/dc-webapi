@@ -1,7 +1,8 @@
 import { ActionData } from './IDCWebapi'
 import { IConfig } from "@daocasino/dc-configs"
-import { LastBalances, Eth } from "@daocasino/dc-ethereum-utils"
+import { Eth } from "@daocasino/dc-ethereum-utils"
 import { ApiEventsInstance } from './IApiEvents'
+import { LastBalances } from "@daocasino/dc-blockchain-types"
 
 export interface InitAccountParams {
   ETH: Eth
