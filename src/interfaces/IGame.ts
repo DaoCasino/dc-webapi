@@ -1,5 +1,5 @@
 import { IConfig } from "@daocasino/dc-configs"
-import { ETHInstance } from "@daocasino/dc-ethereum-utils"
+import { BlockchainUtilsInstance } from "@daocasino/dc-blockchain-types"
 import { ApiEventsInstance } from './IApiEvents'
 import { PlayParams, IGameLogic, ConnectParams } from "@daocasino/dc-core"
 
@@ -11,7 +11,7 @@ export interface CreateGameParams {
 }
 
 export interface InitGameInstanceParams {
-  Eth: ETHInstance
+  Eth: BlockchainUtilsInstance
   config: IConfig
   eventEmitter: ApiEventsInstance
 }
