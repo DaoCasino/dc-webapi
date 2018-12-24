@@ -1,7 +1,8 @@
-import { IConfig } from "dc-configs"
-import { ETHInstance } from "dc-ethereum-utils"
-import { PlayParams, IGameLogic, ConnectParams } from "dc-core"
-import { EventEmitter } from "events"
+import { IConfig } from "@daocasino/dc-configs"
+import { ETHInstance } from "@daocasino/dc-ethereum-utils"
+import { ApiEventsInstance } from './IApiEvents'
+import { PlayParams, IGameLogic, ConnectParams } from "@daocasino/dc-core"
+
 export interface CreateGameParams {
   name: string
   gameLogicFunction: () => IGameLogic
@@ -9,10 +10,10 @@ export interface CreateGameParams {
   rules: any
 }
 
-export interface InitGameParams extends CreateGameParams {
+export interface InitGameInstanceParams {
   Eth: ETHInstance
   config: IConfig
-  eventEmitter: EventEmitter
+  eventEmitter: ApiEventsInstance
 }
 
 interface GameBalances {
@@ -49,7 +50,7 @@ export interface DisconnectResult extends ChannelResult {
 /** Interface for user call */
 export interface IGame {
   onGameEvent: (event: string, func: (data: any) => void) => void
-  start: (params: ConnectParams) => Promise<void>
+  createGame: (params: CreateGameParams) => Promise<void>
   connect: (params: ConnectParams) => Promise<ConnectResult>
   play: (params: PlayParams) => Promise<PlayResult>
   disconnect: () => Promise<DisconnectResult>
