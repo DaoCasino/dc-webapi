@@ -1,11 +1,12 @@
 {
   "name": "@daocasino/dc-webapi",
-  "version": "0.2.0",
+  "version": "0.2.3",
   "main": "./lib/index.js",
   "license": "MIT",
   "scripts": {
     "build:ts": "npm-run-all typescript",
-    "build": "npm-run-all typescript && node scripts/build.js",
+    "build": "npm-run-all typescript",
+    "build4browser": "node scripts/build.js",
     "clean": "rimraf lib",
     "typescript": "tsc --build",
     "test:game": "mocha --timeout 99999999 -r ts-node/register src/__tests__/startGame.test.ts",
@@ -21,11 +22,11 @@
     "@types/node": "^10.11.7",
     "@types/web3": "^1.0.6",
     "cross-fetch": "^2.0.6",
-    "@daocasino/dc-configs": "^0.2.0",
-    "@daocasino/dc-core": "^0.2.0",
-    "@daocasino/dc-ethereum-utils": "^0.2.0",
-    "@daocasino/dc-logging": "^0.2.0",
-    "@daocasino/dc-messaging": "^0.2.0"
+    "@daocasino/dc-configs": "^0.2.2",
+    "@daocasino/dc-core": "^0.2.2",
+    "@daocasino/dc-ethereum-utils": "^0.2.2",
+    "@daocasino/dc-logging": "^0.2.2",
+    "@daocasino/dc-messaging": "^0.2.2"
   },
   "gitHead": "c83ce2ab1c77daa4fabf666260b0698d37dbf312"
 }
