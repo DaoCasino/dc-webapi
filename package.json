@@ -1,11 +1,12 @@
 {
   "name": "@daocasino/dc-webapi",
-  "version": "0.2.2",
+  "version": "0.2.3",
   "main": "./lib/index.js",
   "license": "MIT",
   "scripts": {
     "build:ts": "npm-run-all typescript",
-    "build": "npm-run-all typescript && node scripts/build.js",
+    "build": "npm-run-all typescript",
+    "build4browser": "node scripts/build.js",
     "clean": "rimraf lib",
     "typescript": "tsc --build",
     "test:game": "mocha --timeout 99999999 -r ts-node/register src/__tests__/startGame.test.ts",
