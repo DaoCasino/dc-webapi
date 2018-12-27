@@ -1,6 +1,6 @@
 {
   "name": "@daocasino/dc-webapi",
-  "version": "0.2.3",
+  "version": "0.2.4",
   "main": "./lib/index.js",
   "license": "MIT",
   "scripts": {
@@ -19,14 +19,14 @@
     "@daocasino/dc-blockchain-types": "^0.2.0"
   },
   "dependencies": {
+    "@daocasino/dc-configs": "^0.2.4",
+    "@daocasino/dc-core": "^0.2.4",
+    "@daocasino/dc-ethereum-utils": "^0.2.4",
+    "@daocasino/dc-logging": "^0.2.4",
+    "@daocasino/dc-messaging": "^0.2.4",
     "@types/node": "^10.11.7",
     "@types/web3": "^1.0.6",
-    "cross-fetch": "^2.0.6",
-    "@daocasino/dc-configs": "^0.2.2",
-    "@daocasino/dc-core": "^0.2.2",
-    "@daocasino/dc-ethereum-utils": "^0.2.2",
-    "@daocasino/dc-logging": "^0.2.2",
-    "@daocasino/dc-messaging": "^0.2.2"
+    "cross-fetch": "^2.0.6"
   },
   "gitHead": "c83ce2ab1c77daa4fabf666260b0698d37dbf312"
 }
