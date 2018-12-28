@@ -21,6 +21,7 @@
   "dependencies": {
     "@daocasino/dc-configs": "^0.2.4",
     "@daocasino/dc-core": "^0.2.4",
+    "@daocasino/dc-wallet": "0.2.0",
     "@daocasino/dc-ethereum-utils": "^0.2.4",
     "@daocasino/dc-logging": "^0.2.4",
     "@daocasino/dc-messaging": "^0.2.4",
