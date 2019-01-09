@@ -7,7 +7,7 @@ import {
   AccountInstance
 } from "./interfaces"
 import { Eth } from "@daocasino/dc-ethereum-utils"
-import { Events, EventsInstance } from '@daocasino/dc-wallet'
+import { walletFactory, Events, EventsInstance, WalletAccountsInstance } from '@daocasino/dc-wallet'
 import { Logger } from '@daocasino/dc-logging'
 import { config, setDefaultConfig, IConfigOptions } from "@daocasino/dc-configs"
 
@@ -15,6 +15,7 @@ const log = new Logger('WebAPI:')
 
 export default class DCWebapi implements WebapiInstance {
   private ETH: Eth
+  private wallet: WalletAccountsInstance
   private initParams: IConfigOptions
   private ApiEvents: EventsInstance
   
@@ -27,7 +28,7 @@ export default class DCWebapi implements WebapiInstance {
   ) {
     this.initParams = initParams
     this.ApiEvents = new Events
-  
+    
     if (callback) {
       this.on('ready', callback)
     }
@@ -48,20 +49,19 @@ export default class DCWebapi implements WebapiInstance {
     }
   }
 
-  private configurateParams() {
-    this.on('paramsReady', async () => {
-      await this.webapiStart()
-    })
+  private async configurateParams(): Promise<void> {    
+    if (
+      !this.ApiEvents.getEnviroment().isIframe ||
+      typeof this.initParams !== 'undefined'
+    ) {
+      setDefaultConfig(this.initParams)
+    } else {
+      const params = await this.ApiEvents.request('getParams')
+      setDefaultConfig(params)
+    }
     
-    // if (
-    //   this.ApiEvents.getEnviroment().isIframe ||
-    //   typeof this.initParams !== 'undefined'
-    // ) {
-    //   setDefaultConfig(this.initParams)
-    //   this.ApiEvents.emit('paramsReady', null)
-    // } else {
-      this.ApiEvents.crossEmit('getParams', null)
-    // }
+    this.wallet = await walletFactory(this.initParams)
+    await this.webapiStart()
   }
 
   init(): Promise<ReadyInstnce> {
@@ -85,7 +85,8 @@ export default class DCWebapi implements WebapiInstance {
       gasPrice: price,
       gasLimit: limit,
       web3HttpProviderUrl: httpProviderUrl,
-      contracts
+      contracts,
+      privateKey
     } = config.default
 
     this.ETH = new Eth({
@@ -96,7 +97,7 @@ export default class DCWebapi implements WebapiInstance {
     })
     
     this.account = new Account({
-      ETH: this.ETH,
+      wallet: this.wallet,
       config: config.default,
       eventEmitter: this.ApiEvents
     })
@@ -107,10 +108,12 @@ export default class DCWebapi implements WebapiInstance {
       eventEmitter: this.ApiEvents
     })
 
-    this.account.init(
-      config.default.standartWalletPass,
-      config.default.privateKey
-    )
+    if (!this.ApiEvents.getEnviroment().isIframe) {
+      this.account.init(
+        config.default.standartWalletPass,
+        config.default.privateKey
+      )
+    }
     
     this.ApiEvents.emit('ready', this)
   }  

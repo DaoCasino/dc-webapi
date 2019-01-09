@@ -3,6 +3,7 @@ import { IConfig, config } from '@daocasino/dc-configs'
 import { Eth, add0x } from "@daocasino/dc-ethereum-utils"
 import { LastBalances } from "@daocasino/dc-blockchain-types"
 import { AccountInstance, InitAccountParams } from "./interfaces/IAccount"
+import { WalletAccountsInstance } from '@daocasino/dc-wallet'
 import { ActionData } from './interfaces/IDCWebapi'
 
 const log = new Logger("Account:")
@@ -68,8 +69,8 @@ export default class Account implements AccountInstance {
   }
 
   /** Get @daocasino/dc-ethereum-utils instance */
-  getEthInstance(): Eth {
-    return this._params.ETH
+  getWalletInstance(): WalletAccountsInstance {
+    return this._params.wallet
   }
 
   init(walletPassword: string, privateKeytoCreate: string): void {
@@ -91,23 +92,23 @@ export default class Account implements AccountInstance {
     }
 
     /** Init account in Eth instance */
-    this._params.ETH.initAccount(privateKeytoCreate)
+    this._params.wallet.createAccountWithPrivateKey(privateKeytoCreate)
 
     /**
      * Add and Encrypt wallet with password in params
      * and save in localStorage with walletName
      * in config
      */
-    this._params.ETH.saveWallet(privateKeytoCreate, walletPassword)
+    // this._params.ETH.saveWallet(privateKeytoCreate, walletPassword)
 
     /** Save address */
-    this._address = add0x(this._params.ETH.getAccount().address)
+    this._address = add0x(this._params.wallet.getDefaultAccount().address)
     /** Emit created account event */
     // this._params.eventEmitter.emit(this.GET_ACCOUNT_INFO, this._address)
     log.info(`Account ${this._address} created`)
   }
 
-  getAddress(): string {
+  async getAddress(): Promise<string> {
     /**
      * If localstorage wallet not exist
      * then return local address
@@ -115,49 +116,17 @@ export default class Account implements AccountInstance {
     if (typeof this._address !== "undefined") {
       return this._address
     }
-    /**
-     * Check local storage on exist wallet
-     * with wallet name in config.default if exist = true
-     * then parse wallet and return address
-     */
-    if (localStorage.getItem(this._configuration.walletName)) {
-      return add0x(this._params.ETH.getWalletAccount().address)
-    }
 
-    log.warn(`
-      Account addres is not define please
-      create new account with use Account.init(password, privateKey)
-    `)
-  }
 
-  exportPrivateKey(walletPassword: string): string {
-    /**
-     * Check localStorage if
-     * not exist wallet with name
-     * throw new Error
-     */
-    if (typeof localStorage === "undefined") {
-      return this._params.ETH.getWalletAccount().privateKey
-    }
-    
-    if (!localStorage.getItem(this._configuration.walletName)) {
-      throw new Error(`
-        Not wallet with name: ${this._configuration.walletName}
-        in localStorage please init account with Account.init() method
-      `)
-    }
-
-    /** Get wallet and decrypt in localStorage */
-    this._params.ETH.loadWallet(walletPassword)
-    /** Return private key */
-    return this._params.ETH.getWalletAccount().privateKey
+    const address = await this._params.eventEmitter.request('getAddress')
+    return address
   }
 
   async getBalances(): Promise<LastBalances> {
     /** Get account address */
-    const accountAddress: string = this.getAddress()
+    const accountAddress: string = await this.getAddress()
     /** Get and return ethereum and bet token balance on account */
-    const { eth, bet } = await this._params.ETH.getBalances(accountAddress)
+    const { eth, bet } = await this._params.eventEmitter.request('getBalances', accountAddress)
     return { eth, bet }
   }
 }
