@@ -20,6 +20,7 @@ import { dec2bet } from "@daocasino/dc-ethereum-utils"
 import { BlockchainUtilsInstance } from "@daocasino/dc-blockchain-types"
 import { TransportProviderFactory, IMessagingProvider } from "@daocasino/dc-messaging"
 import fetch from "cross-fetch"
+
 const log = new Logger("Game:")
 
 export default class Game implements IGame {

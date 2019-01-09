@@ -1,14 +1,13 @@
 import Game from "./Game"
 import Account from "./Account"
-import ApiEvents from './ApiEvents'
 import {
   IGame,
   ReadyInstnce,
   WebapiInstance,
-  AccountInstance,
-  ApiEventsInstance
+  AccountInstance
 } from "./interfaces"
 import { Eth } from "@daocasino/dc-ethereum-utils"
+import { Events, EventsInstance } from '@daocasino/dc-wallet'
 import { Logger } from '@daocasino/dc-logging'
 import { config, setDefaultConfig, IConfigOptions } from "@daocasino/dc-configs"
 
@@ -17,10 +16,8 @@ const log = new Logger('WebAPI:')
 export default class DCWebapi implements WebapiInstance {
   private ETH: Eth
   private initParams: IConfigOptions
-  private ApiEvents: ApiEventsInstance
+  private ApiEvents: EventsInstance
   
-  public isIframe: boolean
-  public isBrowser: boolean
   public account: AccountInstance
   public game: IGame
 
@@ -29,14 +26,8 @@ export default class DCWebapi implements WebapiInstance {
     callback?: (instance: DCWebapi) => void
   ) {
     this.initParams = initParams
-    this.isBrowser = (typeof window !== 'undefined')
-    this.isIframe = (this.isBrowser && window.self !== window.top)
-
-    this.ApiEvents = new ApiEvents({
-      isBrowser: this.isBrowser,
-      isIframe: this.isIframe
-    })
-
+    this.ApiEvents = new Events
+  
     if (callback) {
       this.on('ready', callback)
     }
@@ -62,12 +53,15 @@ export default class DCWebapi implements WebapiInstance {
       await this.webapiStart()
     })
     
-    if (!this.isIframe && typeof this.initParams !== 'undefined') {
-      setDefaultConfig(this.initParams)
-      this.ApiEvents.emit('paramsReady', null)
-    } else {
+    // if (
+    //   this.ApiEvents.getEnviroment().isIframe ||
+    //   typeof this.initParams !== 'undefined'
+    // ) {
+    //   setDefaultConfig(this.initParams)
+    //   this.ApiEvents.emit('paramsReady', null)
+    // } else {
       this.ApiEvents.crossEmit('getParams', null)
-    }
+    // }
   }
 
   init(): Promise<ReadyInstnce> {

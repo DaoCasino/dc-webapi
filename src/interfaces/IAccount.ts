@@ -1,13 +1,13 @@
 import { ActionData } from './IDCWebapi'
 import { IConfig } from "@daocasino/dc-configs"
 import { Eth } from "@daocasino/dc-ethereum-utils"
-import { ApiEventsInstance } from './IApiEvents'
+import { EventsInstance } from '@daocasino/dc-wallet'
 import { LastBalances } from "@daocasino/dc-blockchain-types"
 
 export interface InitAccountParams {
   ETH: Eth
   config: IConfig,
-  eventEmitter: ApiEventsInstance
+  eventEmitter: EventsInstance
 }
 
 export interface AccountInstance {
