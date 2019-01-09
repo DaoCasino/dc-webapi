@@ -60,7 +60,7 @@ export default class DCWebapi implements WebapiInstance {
       setDefaultConfig(params)
     }
     
-    this.wallet = await walletFactory(this.initParams)
+    this.wallet = await walletFactory(this.initParams, this.ApiEvents)
     await this.webapiStart()
   }
 
@@ -84,6 +84,7 @@ export default class DCWebapi implements WebapiInstance {
       walletName,
       gasPrice: price,
       gasLimit: limit,
+      standartWalletPass,
       web3HttpProviderUrl: httpProviderUrl,
       contracts,
       privateKey
@@ -109,10 +110,7 @@ export default class DCWebapi implements WebapiInstance {
     })
 
     if (!this.ApiEvents.getEnviroment().isIframe) {
-      this.account.init(
-        config.default.standartWalletPass,
-        config.default.privateKey
-      )
+      this.account.init(standartWalletPass, privateKey)
     }
     
     this.ApiEvents.emit('ready', this)

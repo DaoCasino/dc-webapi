@@ -123,10 +123,8 @@ export default class Account implements AccountInstance {
   }
 
   async getBalances(): Promise<LastBalances> {
-    /** Get account address */
-    const accountAddress: string = await this.getAddress()
     /** Get and return ethereum and bet token balance on account */
-    const { eth, bet } = await this._params.eventEmitter.request('getBalances', accountAddress)
+    const { eth, bet } = await this._params.eventEmitter.request('getBalance')
     return { eth, bet }
   }
 }
