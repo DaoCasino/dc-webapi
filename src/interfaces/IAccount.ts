@@ -11,9 +11,7 @@ export interface InitAccountParams {
 }
 
 export interface AccountInstance {
-  init: (walletPassword: string, privateKeytoCreate?: string) => void
-  initAccountInIframe: (data: ActionData) => void
-  getAddress: () => Promise<string>
-  getWalletInstance: () => WalletAccountsInstance
+  init: (privateKeytoCreate?: string) => Promise<string> 
+  getAddress: () => string
   getBalances: (address?: string) => Promise<LastBalances>
 }

@@ -27,6 +27,7 @@ export default class Game implements IGame {
   private ETH: BlockchainUtilsInstance
   private params: InitGameInstanceParams
   private GameInstance: IDAppPlayerInstance
+  private gameContractAddress: string
   private DApp: IDApp
   public configuration: IConfig
   private transportProvider: IMessagingProvider
@@ -81,18 +82,18 @@ export default class Game implements IGame {
     const { platformId, blockchainNetwork } = this.configuration
     const { gameLogicFunction, name, rules } = createGameParams
 
-    let { gameContractAddress } = createGameParams
+    this.gameContractAddress = createGameParams.gameContractAddress
 
     if (
       blockchainNetwork === "local" &&
-      gameContractAddress.indexOf("->") > -1
+      this.gameContractAddress.indexOf("->") > -1
     ) {
       const { web3HttpProviderUrl } = config.default
-      gameContractAddress = await fetch(
-        `${web3HttpProviderUrl}/${gameContractAddress.split("->")[0]}`
+      this.gameContractAddress = await fetch(
+        `${web3HttpProviderUrl}/${this.gameContractAddress.split("->")[0]}`
       )
         .then(result => result.json())
-        .then(result => result[gameContractAddress.split("->")[1]])
+        .then(result => result[this.gameContractAddress.split("->")[1]])
     }
 
     const dappParams: DAppParams = {
@@ -101,7 +102,8 @@ export default class Game implements IGame {
       platformId,
       blockchainNetwork,
       gameLogicFunction,
-      gameContractAddress,
+      gameContractAddress: this.gameContractAddress,
+      userAddress: this.params.playerAddress,
       roomProvider: this.transportProvider,
       Eth: this.ETH
     }
@@ -114,13 +116,14 @@ export default class Game implements IGame {
   }
   
   async connect(params: ConnectParams): Promise<ConnectResult> {
-    if (typeof this.ETH.getAccount().address === "undefined") {
+    const address = await this.params.eventEmitter.request('getAddress')
+    if (typeof address === "undefined") {
       throw new Error(
         "Account is not defined please create new account and start game again"
       )
     }
 
-    const userBalance = await this.ETH.getBalances()
+    const userBalance = await this.params.eventEmitter.request('getBalance', address)
     const { playerDeposit } = params
     if (userBalance.bet.balance < playerDeposit) {
       throw new Error(
@@ -142,24 +145,34 @@ export default class Game implements IGame {
       data: {}
     })
 
+    const launchConnect = this.GameInstance.launchConnect({ playerDeposit })
+    // log.info(launchConnect.next())
+    const { value: connectParams } = await launchConnect.next()
+    
+    await this.params.eventEmitter.request(
+      'openChannel',
+      { ...connectParams, contractAddress: this.gameContractAddress }
+    )
+
+    const { value: connectResult } = await launchConnect.next()
     /** Start connect to the game */
-    const gameConnect = await this.GameInstance.connect({ playerDeposit })
+    // const gameConnect = await this.GameInstance.connect({ playerDeposit })
 
     /** Check channel state */
-    if (this.getChannelStatus(gameConnect.state) === "opened") {
+    if (this.getChannelStatus(connectResult.state) === "opened") {
       this.params.eventEmitter.emit("connectionResult", {
         message: "connect to bankroller succefull"
       })
-      log.info(`Channel  ${gameConnect.channelId} opened! Go to game!`)
+      log.info(`Channel  ${connectResult.channelId} opened! Go to game!`)
       /** Generate and return data for connected results */
       return {
-        channelID: gameConnect.channelId,
-        channelState: this.getChannelStatus(gameConnect.state),
-        dealerAddress: gameConnect.bankrollerAddress,
-        playerAddress: gameConnect.playerAddress,
+        channelID: connectResult.channelId,
+        channelState: this.getChannelStatus(connectResult.state),
+        dealerAddress: connectResult.bankrollerAddress,
+        playerAddress: connectResult.playerAddress,
         channelBalances: {
-          bankroller: dec2bet(gameConnect.bankrollerDepositWei),
-          player: dec2bet(gameConnect.playerDepositWei)
+          bankroller: dec2bet(connectResult.bankrollerDepositWei),
+          player: dec2bet(connectResult.playerDepositWei)
         }
       }
     }
@@ -198,18 +211,28 @@ export default class Game implements IGame {
 
   async disconnect(): Promise<DisconnectResult> {
     /** Start game disconnect */
-    const gameDisconnect = await this.GameInstance.disconnect()
+    const launchDisconnect = this.GameInstance.launchDisconnect()
+    const { value: disconnectParams } = await launchDisconnect.next()
+    const { lastState, consentSignature } = disconnectParams
+    
+    await this.params.eventEmitter.request(
+      'closeChannel',
+      { ...lastState, consentSignature }
+    )
+
+    const { value: disconnectResult } = await launchDisconnect.next()
+    // const gameDisconnect = await this.GameInstance.disconnect()
 
     /** Check channel state */
-    if (this.getChannelStatus(gameDisconnect.state) === "closed") {
-      log.info(`Channel ${gameDisconnect._id} closed and Game Over`)
+    if (this.getChannelStatus(disconnectResult.state) === "closed") {
+      log.info(`Channel ${disconnectResult._id} closed and Game Over`)
       /** Generate and return data for connected results */
       return {
-        channelID: gameDisconnect._id,
-        channelState: this.getChannelStatus(gameDisconnect.state),
+        channelID: disconnectResult._id,
+        channelState: this.getChannelStatus(disconnectResult.state),
         resultBalances: {
-          bankroller: dec2bet(gameDisconnect._bankrollerBalance),
-          player: dec2bet(gameDisconnect._playerBalance)
+          bankroller: dec2bet(disconnectResult._bankrollerBalance),
+          player: dec2bet(disconnectResult._playerBalance)
         }
       }
     }

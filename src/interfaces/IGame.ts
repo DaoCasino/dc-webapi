@@ -12,6 +12,7 @@ export interface CreateGameParams {
 
 export interface InitGameInstanceParams {
   Eth: BlockchainUtilsInstance
+  playerAddress: string
   config: IConfig
   eventEmitter: EventsInstance
 }

@@ -6,7 +6,7 @@ import {
   WebapiInstance,
   AccountInstance
 } from "./interfaces"
-import { Eth } from "@daocasino/dc-ethereum-utils"
+import { BlockchainUtilsInstance } from '@daocasino/dc-blockchain-types'
 import { walletFactory, Events, EventsInstance, WalletAccountsInstance } from '@daocasino/dc-wallet'
 import { Logger } from '@daocasino/dc-logging'
 import { config, setDefaultConfig, IConfigOptions } from "@daocasino/dc-configs"
@@ -14,7 +14,7 @@ import { config, setDefaultConfig, IConfigOptions } from "@daocasino/dc-configs"
 const log = new Logger('WebAPI:')
 
 export default class DCWebapi implements WebapiInstance {
-  private ETH: Eth
+  private ETH: BlockchainUtilsInstance
   private wallet: WalletAccountsInstance
   private initParams: IConfigOptions
   private ApiEvents: EventsInstance
@@ -80,39 +80,23 @@ export default class DCWebapi implements WebapiInstance {
   }
 
   private async webapiStart(): Promise<void> {
-    const {
-      walletName,
-      gasPrice: price,
-      gasLimit: limit,
-      standartWalletPass,
-      web3HttpProviderUrl: httpProviderUrl,
-      contracts,
-      privateKey
-    } = config.default
-
-    this.ETH = new Eth({
-      walletName,
-      httpProviderUrl,
-      gasParams: { price, limit },
-      ERC20ContractInfo: contracts.ERC20
-    })
-    
+    const { privateKey } = config.default
+    this.ETH = this.wallet.getBlockchainUtils()
     this.account = new Account({
       wallet: this.wallet,
       config: config.default,
       eventEmitter: this.ApiEvents
     })
-    
+
+    const playerAddress = await this.account.init(privateKey)
+    log.info(playerAddress)
     this.game = new Game({
       Eth: this.ETH,
+      playerAddress,
       config: config.default,
       eventEmitter: this.ApiEvents
     })
 
-    if (!this.ApiEvents.getEnviroment().isIframe) {
-      this.account.init(standartWalletPass, privateKey)
-    }
-    
     this.ApiEvents.emit('ready', this)
   }  
 }

@@ -3,7 +3,10 @@
   "compilerOptions": {
     "composite": true,
     "rootDir": "src",
-    "outDir": "lib"
+    "outDir": "lib",
+    "lib": [
+      "es6"
+    ]
   },
   "include": ["src/**/*"],
   "references": [
