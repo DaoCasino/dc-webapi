@@ -14,6 +14,7 @@ import {
   CreateGameParams,
   InitGameInstanceParams,
 } from "./interfaces/IGame"
+import { getChannelStatus } from '@daocasino/dc-wallet'
 import { Logger } from "@daocasino/dc-logging"
 import { IConfig, config } from "@daocasino/dc-configs"
 import { dec2bet } from "@daocasino/dc-ethereum-utils"
@@ -45,26 +46,6 @@ export default class Game implements IGame {
 
   private stopMessaging(): Promise<void> {
     return this.transportProvider.destroy()
-  }
-
-  /**
-   * Matching channel state and
-   * return channel status in readable
-   * the form
-   */
-  private getChannelStatus(channelState: string): string {
-    switch (channelState) {
-      case "0":
-        return "unused"
-      case "1":
-        return "opened"
-      case "2":
-        return "closed"
-      case "3":
-        return "dispute"
-      default:
-        throw new Error(`unknown channel state: ${channelState}`)
-    }
   }
 
   onGameEvent(event: string, func: (data: any) => void) {
@@ -159,7 +140,7 @@ export default class Game implements IGame {
     // const gameConnect = await this.GameInstance.connect({ playerDeposit })
 
     /** Check channel state */
-    if (this.getChannelStatus(connectResult.state) === "opened") {
+    if (getChannelStatus(connectResult.state) === "opened") {
       this.params.eventEmitter.emit("connectionResult", {
         message: "connect to bankroller succefull"
       })
@@ -167,7 +148,7 @@ export default class Game implements IGame {
       /** Generate and return data for connected results */
       return {
         channelID: connectResult.channelId,
-        channelState: this.getChannelStatus(connectResult.state),
+        channelState: getChannelStatus(connectResult.state),
         dealerAddress: connectResult.bankrollerAddress,
         playerAddress: connectResult.playerAddress,
         channelBalances: {
@@ -221,15 +202,14 @@ export default class Game implements IGame {
     )
 
     const { value: disconnectResult } = await launchDisconnect.next()
-    // const gameDisconnect = await this.GameInstance.disconnect()
-
+    log.info(disconnectResult)
     /** Check channel state */
-    if (this.getChannelStatus(disconnectResult.state) === "closed") {
+    if (getChannelStatus(disconnectResult.state) === "closed") {
       log.info(`Channel ${disconnectResult._id} closed and Game Over`)
       /** Generate and return data for connected results */
       return {
         channelID: disconnectResult._id,
-        channelState: this.getChannelStatus(disconnectResult.state),
+        channelState: getChannelStatus(disconnectResult.state),
         resultBalances: {
           bankroller: dec2bet(disconnectResult._bankrollerBalance),
           player: dec2bet(disconnectResult._playerBalance)

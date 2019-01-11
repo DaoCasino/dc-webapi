@@ -28,7 +28,6 @@ export default class DCWebapi implements WebapiInstance {
   ) {
     this.initParams = initParams
     this.ApiEvents = new Events
-    
     if (callback) {
       this.on('ready', callback)
     }
@@ -54,6 +53,7 @@ export default class DCWebapi implements WebapiInstance {
       !this.ApiEvents.getEnviroment().isIframe ||
       typeof this.initParams !== 'undefined'
     ) {
+      this.ApiEvents.listenAll()
       setDefaultConfig(this.initParams)
     } else {
       const params = await this.ApiEvents.request('getParams')
