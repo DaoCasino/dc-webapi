@@ -148,7 +148,7 @@ export default class Game implements IGame {
     const launchConnect = this.GameInstance.launchConnect({ playerDeposit })
     // log.info(launchConnect.next())
     const { value: connectParams } = await launchConnect.next()
-    
+
     await this.params.eventEmitter.request(
       'openChannel',
       { ...connectParams, contractAddress: this.gameContractAddress }
@@ -214,7 +214,7 @@ export default class Game implements IGame {
     const launchDisconnect = this.GameInstance.launchDisconnect()
     const { value: disconnectParams } = await launchDisconnect.next()
     const { lastState, consentSignature } = disconnectParams
-    
+
     await this.params.eventEmitter.request(
       'closeChannel',
       { ...lastState, consentSignature }
