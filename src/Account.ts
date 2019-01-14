@@ -1,6 +1,7 @@
 import { Logger } from "@daocasino/dc-logging"
 import { IConfig, config } from '@daocasino/dc-configs'
 import { Eth, add0x } from "@daocasino/dc-ethereum-utils"
+import { checkEnviroment } from '@daocasino/dc-events'
 import { LastBalances } from "@daocasino/dc-blockchain-types"
 import { AccountInstance, InitAccountParams } from "./interfaces/IAccount"
 import { WalletAccountsInstance } from '@daocasino/dc-wallet'
@@ -19,7 +20,7 @@ export default class Account implements AccountInstance {
   }
 
   async init(privateKeytoCreate?: string): Promise<string> {
-    const { isIframe } = this._params.eventEmitter.getEnviroment()
+    const { isIframe } = checkEnviroment()
     if (isIframe) {
       this._address = await this._params.eventEmitter.request('getAddress')
     } else {
