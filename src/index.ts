@@ -1,5 +1,5 @@
-import Game from "./Game"
-import Account from "./Account"
+import Game from './Game'
+import Account from './Account'
 import ApiEvents from './ApiEvents'
 import {
   IGame,
@@ -7,10 +7,10 @@ import {
   WebapiInstance,
   AccountInstance,
   ApiEventsInstance
-} from "./interfaces"
-import { Eth } from "@daocasino/dc-ethereum-utils"
+} from './interfaces'
+import { Eth } from '@daocasino/dc-ethereum-utils'
 import { Logger } from '@daocasino/dc-logging'
-import { config, setDefaultConfig, IConfigOptions } from "@daocasino/dc-configs"
+import { config, setDefaultConfig, IConfigOptions } from '@daocasino/dc-configs'
 
 const log = new Logger('WebAPI:')
 
@@ -18,7 +18,7 @@ export default class DCWebapi implements WebapiInstance {
   private ETH: Eth
   private initParams: IConfigOptions
   private ApiEvents: ApiEventsInstance
-  
+
   public isIframe: boolean
   public isBrowser: boolean
   public account: AccountInstance
@@ -61,7 +61,7 @@ export default class DCWebapi implements WebapiInstance {
     this.on('paramsReady', async () => {
       await this.webapiStart()
     })
-    
+
     if (!this.isIframe && typeof this.initParams !== 'undefined') {
       setDefaultConfig(this.initParams)
       this.ApiEvents.emit('paramsReady', null)
@@ -100,13 +100,13 @@ export default class DCWebapi implements WebapiInstance {
       gasParams: { price, limit },
       ERC20ContractInfo: contracts.ERC20
     })
-    
+
     this.account = new Account({
       ETH: this.ETH,
       config: config.default,
       eventEmitter: this.ApiEvents
     })
-    
+
     this.game = new Game({
       Eth: this.ETH,
       config: config.default,
@@ -117,7 +117,9 @@ export default class DCWebapi implements WebapiInstance {
       config.default.standartWalletPass,
       config.default.privateKey
     )
-    
+
     this.ApiEvents.emit('ready', this)
-  }  
+  }
 }
+
+export { ConnectResult, DisconnectResult, IGame } from './interfaces/IGame'
