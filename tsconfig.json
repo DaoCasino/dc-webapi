@@ -13,6 +13,7 @@
     { "path": "../dc-core" },
     { "path": "../dc-wallet" },
     { "path": "../dc-messaging" },
+    { "path": "../dc-wallet" },
     { "path": "../dc-ethereum-utils" },
     { "path": "../dc-logging" },
     { "path": "../dc-configs" },

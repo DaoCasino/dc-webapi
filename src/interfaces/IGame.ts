@@ -1,5 +1,5 @@
 import { IConfig } from "@daocasino/dc-configs"
-import { EventsInstance } from '@daocasino/dc-wallet'
+import { EventsInstance } from '@daocasino/dc-events'
 import { BlockchainUtilsInstance } from "@daocasino/dc-blockchain-types"
 import { PlayParams, IGameLogic, ConnectParams } from "@daocasino/dc-core"
 
