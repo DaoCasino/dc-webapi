@@ -1,8 +1,8 @@
-import { Logger } from "@daocasino/dc-logging"
+import { Logger } from '@daocasino/dc-logging'
 import { IConfig, config } from '@daocasino/dc-configs'
-import { Eth, add0x } from "@daocasino/dc-ethereum-utils"
+import { Eth, add0x } from '@daocasino/dc-ethereum-utils'
 import { checkEnviroment } from '@daocasino/dc-events'
-import { LastBalances } from "@daocasino/dc-blockchain-types"
+import { LastBalances, SolidityTypeValue } from "@daocasino/dc-blockchain-types"
 import { AccountInstance, InitAccountParams } from "./interfaces/IAccount"
 import { WalletAccountsInstance } from '@daocasino/dc-wallet'
 import { ActionData } from './interfaces/IDCWebapi'
@@ -11,12 +11,10 @@ const log = new Logger("Account:")
 
 export default class Account implements AccountInstance {
   private _params: InitAccountParams
-  private _configuration: IConfig
   private _address: string
   
   constructor(params: InitAccountParams) {
     this._params = params
-    this._configuration = config.default
   }
 
   async init(privateKeytoCreate?: string): Promise<string> {
@@ -30,6 +28,16 @@ export default class Account implements AccountInstance {
 
     log.info(`Account ${this._address} created`)
     return this._address
+  }
+
+  async playerSign(data: SolidityTypeValue[]): Promise<string> {
+    try {
+      console.log(this._params)
+      const signature = await this._params.eventEmitter.request('signData', data)
+      return signature
+    } catch (error) {
+      throw error
+    }
   }
 
   getAddress(): string {

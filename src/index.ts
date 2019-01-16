@@ -92,6 +92,7 @@ export default class DCWebapi implements WebapiInstance {
     this.game = new Game({
       Eth: this.ETH,
       playerAddress,
+      playerSign: this.account.playerSign.bind(this.account),
       config: config.default,
       eventEmitter: this.ApiEvents
     })
