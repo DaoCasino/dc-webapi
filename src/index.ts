@@ -8,7 +8,7 @@ import {
   AccountInstance
 } from "./interfaces"
 import { BlockchainUtilsInstance } from '@daocasino/dc-blockchain-types'
-import { EventsInstance, Events, checkEnviroment } from '@daocasino/dc-events'
+import Events, { EventsInstance, checkEnviroment } from '@daocasino/dc-events'
 import { walletFactory, WalletAccountsInstance } from '@daocasino/dc-wallet'
 import { Logger } from '@daocasino/dc-logging'
 import { config, setDefaultConfig, IConfigOptions } from '@daocasino/dc-configs'
@@ -54,7 +54,6 @@ export default class DCWebapi implements WebapiInstance {
       !checkEnviroment().isIframe ||
       typeof this.initParams !== 'undefined'
     ) {
-      this.ApiEvents.listenAll()
       setDefaultConfig(this.initParams)
     } else {
       const params = await this.ApiEvents.request('getParams')
@@ -93,6 +92,7 @@ export default class DCWebapi implements WebapiInstance {
     this.game = new Game({
       Eth: this.ETH,
       playerAddress,
+      playerSign: this.account.playerSign.bind(this.account),
       config: config.default,
       eventEmitter: this.ApiEvents
     })

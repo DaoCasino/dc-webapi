@@ -83,6 +83,7 @@ export default class Game implements IGame {
       platformId,
       blockchainNetwork,
       gameLogicFunction,
+      playerSign: this.params.playerSign,
       gameContractAddress: this.gameContractAddress,
       userAddress: this.params.playerAddress,
       roomProvider: this.transportProvider,

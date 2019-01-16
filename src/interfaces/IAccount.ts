@@ -14,5 +14,6 @@ export interface InitAccountParams {
 export interface AccountInstance {
   init: (privateKeytoCreate?: string) => Promise<string> 
   getAddress: () => string
+  playerSign: (data: any) => Promise<string>
   getBalances: (address?: string) => Promise<LastBalances>
 }
