@@ -12,7 +12,7 @@ const log = new Logger("Account:")
 export default class Account implements AccountInstance {
   private _params: InitAccountParams
   private _address: string
-  
+
   constructor(params: InitAccountParams) {
     this._params = params
   }
@@ -44,7 +44,7 @@ export default class Account implements AccountInstance {
     if (typeof this._address === "undefined") {
       throw new Error('Account address is not define')
     }
-    
+
     return this._address
   }
 

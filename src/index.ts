@@ -49,17 +49,17 @@ export default class DCWebapi implements WebapiInstance {
     }
   }
 
-  private async configurateParams(): Promise<void> {    
-    if (
-      !checkEnviroment().isIframe ||
-      typeof this.initParams !== 'undefined'
-    ) {
-      setDefaultConfig(this.initParams)
-    } else {
+  private async configurateParams(): Promise<void> {
+    // if (
+    //   checkEnviroment().isIframe ||
+    //   typeof this.initParams !== 'undefined'
+    // ) {
+    //   setDefaultConfig(this.initParams)
+    // } else {
       const params = await this.ApiEvents.request('getParams')
       setDefaultConfig(params)
-    }
-    
+    // }
+
     this.wallet = await walletFactory(this.initParams, this.ApiEvents)
     await this.webapiStart()
   }
@@ -89,6 +89,8 @@ export default class DCWebapi implements WebapiInstance {
     })
 
     const playerAddress = await this.account.init(privateKey)
+    this.ETH.setAddress(playerAddress)
+
     this.game = new Game({
       Eth: this.ETH,
       playerAddress,
