@@ -50,10 +50,7 @@ export default class DCWebapi implements WebapiInstance {
   }
 
   private async configurateParams(): Promise<void> {    
-    if (
-      !checkEnviroment().isIframe ||
-      typeof this.initParams !== 'undefined'
-    ) {
+    if (!checkEnviroment().isIframe || typeof this.initParams !== 'undefined') {
       setDefaultConfig(this.initParams)
     } else {
       const params = await this.ApiEvents.request('getParams')
