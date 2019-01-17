@@ -1,5 +1,6 @@
 import { IConfig } from "@daocasino/dc-configs"
 import { EventsInstance } from '@daocasino/dc-events'
+import { WalletInstance } from '@daocasino/dc-wallet'
 import { BlockchainUtilsInstance, SolidityTypeValue } from "@daocasino/dc-blockchain-types"
 import { PlayParams, IGameLogic, ConnectParams } from "@daocasino/dc-core"
 
@@ -15,6 +16,7 @@ export interface InitGameInstanceParams {
   playerAddress: string
   playerSign: (data: SolidityTypeValue[]) => Promise<string>
   config: IConfig
+  wallet?: WalletInstance
   eventEmitter: EventsInstance
 }
 

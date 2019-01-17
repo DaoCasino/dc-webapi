@@ -1,3 +1,11 @@
+import fetch from "cross-fetch"
+import { Logger } from "@daocasino/dc-logging"
+import { dec2bet } from "@daocasino/dc-ethereum-utils"
+import { IConfig, config } from "@daocasino/dc-configs"
+import { getChannelStatus } from '@daocasino/dc-wallet'
+import { checkEnviroment } from '@daocasino/dc-events'
+import { BlockchainUtilsInstance } from "@daocasino/dc-blockchain-types"
+import { TransportProviderFactory, IMessagingProvider } from "@daocasino/dc-messaging"
 import {
   DApp,
   IDApp,
@@ -14,13 +22,6 @@ import {
   CreateGameParams,
   InitGameInstanceParams,
 } from "./interfaces/IGame"
-import { getChannelStatus } from '@daocasino/dc-wallet'
-import { Logger } from "@daocasino/dc-logging"
-import { IConfig, config } from "@daocasino/dc-configs"
-import { dec2bet } from "@daocasino/dc-ethereum-utils"
-import { BlockchainUtilsInstance } from "@daocasino/dc-blockchain-types"
-import { TransportProviderFactory, IMessagingProvider } from "@daocasino/dc-messaging"
-import fetch from "cross-fetch"
 
 const log = new Logger("Game:")
 
@@ -41,7 +42,7 @@ export default class Game implements IGame {
 
   /** Create and return messaging provider */
   private initMessaging(): Promise<IMessagingProvider> {
-    return (new TransportProviderFactory).create()
+    return (new TransportProviderFactory(this.configuration.transport)).create()
   }
 
   private stopMessaging(): Promise<void> {
@@ -98,124 +99,137 @@ export default class Game implements IGame {
   }
   
   async connect(params: ConnectParams): Promise<ConnectResult> {
-    const address = await this.params.eventEmitter.request('getAddress')
-    if (typeof address === "undefined") {
-      throw new Error(
-        "Account is not defined please create new account and start game again"
-      )
-    }
-
-    const userBalance = await this.params.eventEmitter.request('getBalance', address)
-    const { playerDeposit } = params
-    if (userBalance.bet.balance < playerDeposit) {
-      throw new Error(
-        "Insufficient BET funds on your account. Try to set up a lower deposit."
-      )
-    }
-
-    const self = this
-    this.GameInstance = await this.DApp.startClient()
-    this.GameInstance.on("instance::status", data => {
-      self.params.eventEmitter.emit("webapi::status", {
-        message: "event from instance",
-        data
+    try {
+      const address = await this.params.eventEmitter.request({ eventName: 'getAddress' })
+      if (typeof address === "undefined") {
+        throw new Error(
+          "Account is not defined please create new account and start game again"
+        )
+      }
+  
+      const userBalance = await this.params.eventEmitter.request({
+        eventName: 'getBalance',
+        eventData: address
       })
-    })
     
-    this.params.eventEmitter.emit("webapi::status", {
-      message: "client try to connect",
-      data: {}
-    })
-
-    const launchConnect = this.GameInstance.launchConnect({ playerDeposit })
-    // log.info(launchConnect.next())
-    const { value: connectParams } = await launchConnect.next()
-
-    await this.params.eventEmitter.request(
-      'openChannel',
-      { ...connectParams, contractAddress: this.gameContractAddress }
-    )
-
-    const { value: connectResult } = await launchConnect.next()
-    /** Start connect to the game */
-    // const gameConnect = await this.GameInstance.connect({ playerDeposit })
-
-    /** Check channel state */
-    if (getChannelStatus(connectResult.state) === "opened") {
-      this.params.eventEmitter.emit("connectionResult", {
-        message: "connect to bankroller succefull"
+      const { playerDeposit } = params
+      if (userBalance.bet.balance < playerDeposit) {
+        throw new Error(
+          "Insufficient BET funds on your account. Try to set up a lower deposit."
+        )
+      }
+  
+      const self = this
+      this.GameInstance = await this.DApp.startClient()
+      this.GameInstance.on("instance::status", data => {
+        self.params.eventEmitter.emit("webapi::status", {
+          message: "event from instance",
+          data
+        })
       })
-      log.info(`Channel  ${connectResult.channelId} opened! Go to game!`)
-      /** Generate and return data for connected results */
-      return {
-        channelID: connectResult.channelId,
-        channelState: getChannelStatus(connectResult.state),
-        dealerAddress: connectResult.bankrollerAddress,
-        playerAddress: connectResult.playerAddress,
-        channelBalances: {
-          bankroller: dec2bet(connectResult.bankrollerDepositWei),
-          player: dec2bet(connectResult.playerDepositWei)
+      
+      this.params.eventEmitter.emit("webapi::status", {
+        message: "client try to connect",
+        data: {}
+      })
+  
+      const launchConnect = this.GameInstance.launchConnect({ playerDeposit })
+      const { value: connectParams } = await launchConnect.next()
+  
+      await this.params.eventEmitter.request({
+        eventName: 'openChannel',
+        eventData: { ...connectParams, contractAddress: this.gameContractAddress }
+      })
+  
+      const { value: connectResult } = await launchConnect.next()
+  
+      /** Check channel state */
+      if (getChannelStatus(connectResult.state) === "opened") {
+        this.params.eventEmitter.emit("connectionResult", {
+          message: "connect to bankroller succefull"
+        })
+        log.info(`Channel  ${connectResult.channelId} opened! Go to game!`)
+        /** Generate and return data for connected results */
+        return {
+          channelID: connectResult.channelId,
+          channelState: getChannelStatus(connectResult.state),
+          dealerAddress: connectResult.bankrollerAddress,
+          playerAddress: connectResult.playerAddress,
+          channelBalances: {
+            bankroller: dec2bet(connectResult.bankrollerDepositWei),
+            player: dec2bet(connectResult.playerDepositWei)
+          }
         }
       }
+    } catch(error) {
+      throw error
     }
   }
 
   async play(params: PlayParams): Promise<PlayResult> {
-    /** Parse params */
-    const { userBets, gameData } = params
-    /** Call play method */
-    const callPlayResults = await this.GameInstance.play({
-      userBets,
-      gameData
-    })
-
-    /** Get state channel balances */
-    const {
-      player,
-      bankroller
-    } = this.GameInstance.getChannelStateData().balance
-
-    /** Generate results and return */
-    // TODO return all from callPlayResults
-    const playResult: PlayResult = {
-      params,
-      profit: callPlayResults.profit,
-      balances: {
-        player: dec2bet(player),
-        bankroller: dec2bet(bankroller)
-      },
-      data: callPlayResults.data,
-      randomNums: callPlayResults.randoms
+    try {
+      /** Parse params */
+      const { userBets, gameData } = params
+      /** Call play method */
+      const callPlayResults = await this.GameInstance.play({
+        userBets,
+        gameData
+      })
+  
+      /** Get state channel balances */
+      const {
+        player,
+        bankroller
+      } = this.GameInstance.getChannelStateData().balance
+  
+      /** Generate results and return */
+      // TODO return all from callPlayResults
+      const playResult: PlayResult = {
+        params,
+        profit: callPlayResults.profit,
+        balances: {
+          player: dec2bet(player),
+          bankroller: dec2bet(bankroller)
+        },
+        data: callPlayResults.data,
+        randomNums: callPlayResults.randoms
+      }
+  
+      return playResult
+    } catch(error) {
+      throw error
     }
-
-    return playResult
   }
 
   async disconnect(): Promise<DisconnectResult> {
-    /** Start game disconnect */
-    const launchDisconnect = this.GameInstance.launchDisconnect()
-    const { value: disconnectParams } = await launchDisconnect.next()
-    const { lastState, consentSignature } = disconnectParams
-
-    await this.params.eventEmitter.request(
-      'closeChannel',
-      { ...lastState, consentSignature }
-    )
-
-    const { value: disconnectResult } = await launchDisconnect.next()
-    log.info(disconnectResult)
-    /** Check channel state */
-    if (getChannelStatus(disconnectResult.state) === "closed") {
-      log.info(`Channel ${disconnectResult._id} closed and Game Over`)
-      /** Generate and return data for connected results */
-      return {
-        channelID: disconnectResult._id,
-        channelState: getChannelStatus(disconnectResult.state),
-        resultBalances: {
-          bankroller: dec2bet(disconnectResult._bankrollerBalance),
-          player: dec2bet(disconnectResult._playerBalance)
+    try {      
+      /** Start game disconnect */
+      const launchDisconnect = this.GameInstance.launchDisconnect()
+      const { value: disconnectParams } = await launchDisconnect.next()
+      const { lastState, consentSignature } = disconnectParams
+  
+      await this.params.eventEmitter.request({
+        eventName: 'closeChannel',
+        eventData: { ...lastState, consentSignature }
+      })
+  
+      const { value: disconnectResult } = await launchDisconnect.next()
+      log.info(disconnectResult)
+      /** Check channel state */
+      if (getChannelStatus(disconnectResult.state) === "closed") {
+        log.info(`Channel ${disconnectResult._id} closed and Game Over`)
+        /** Generate and return data for connected results */
+        return {
+          channelID: disconnectResult._id,
+          channelState: getChannelStatus(disconnectResult.state),
+          resultBalances: {
+            bankroller: dec2bet(disconnectResult._bankrollerBalance),
+            player: dec2bet(disconnectResult._playerBalance)
+          }
         }
       }
+    } catch(error) {
+      throw error
     }
   }
 }

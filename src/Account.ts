@@ -1,18 +1,14 @@
 import { Logger } from '@daocasino/dc-logging'
-import { IConfig, config } from '@daocasino/dc-configs'
-import { Eth, add0x } from '@daocasino/dc-ethereum-utils'
 import { checkEnviroment } from '@daocasino/dc-events'
 import { LastBalances, SolidityTypeValue } from "@daocasino/dc-blockchain-types"
 import { AccountInstance, InitAccountParams } from "./interfaces/IAccount"
-import { WalletAccountsInstance } from '@daocasino/dc-wallet'
-import { ActionData } from './interfaces/IDCWebapi'
 
 const log = new Logger("Account:")
 
 export default class Account implements AccountInstance {
   private _params: InitAccountParams
   private _address: string
-  
+
   constructor(params: InitAccountParams) {
     this._params = params
   }
@@ -20,10 +16,10 @@ export default class Account implements AccountInstance {
   async init(privateKeytoCreate?: string): Promise<string> {
     const { isIframe } = checkEnviroment()
     if (isIframe) {
-      this._address = await this._params.eventEmitter.request('getAddress')
+      this._address = await this._params.eventEmitter.request({ eventName: 'getAddress' })
     } else {
-      this._params.wallet.createAccountWithPrivateKey(privateKeytoCreate)
-      this._address = add0x(this._params.wallet.getDefaultAccount().address)
+      this._params.wallet.accounts.createAccountWithPrivateKey(privateKeytoCreate)
+      this._address = this._params.wallet.accounts.getDefaultAccount().address
     }
 
     log.info(`Account ${this._address} created`)
@@ -32,8 +28,16 @@ export default class Account implements AccountInstance {
 
   async playerSign(data: SolidityTypeValue[]): Promise<string> {
     try {
-      console.log(this._params)
-      const signature = await this._params.eventEmitter.request('signData', data)
+      let signature: string
+      const { isIframe } = checkEnviroment()
+      if (isIframe) {
+        signature = await this._params.eventEmitter.request({
+          eventName: 'signData',
+          eventData: data
+        })
+      } else {
+        signature = this._params.wallet.sign.signData(data)
+      }
       return signature
     } catch (error) {
       throw error
@@ -44,13 +48,17 @@ export default class Account implements AccountInstance {
     if (typeof this._address === "undefined") {
       throw new Error('Account address is not define')
     }
-    
+
     return this._address
   }
 
   async getBalances(address?: string): Promise<LastBalances> {
     /** Get and return ethereum and bet token balance on account */
-    const { eth, bet } = await this._params.eventEmitter.request('getBalance', address)
+    const { eth, bet } = await this._params.eventEmitter.request({
+      eventName: 'getBalance',
+      eventData: address
+    })
+    
     return { eth, bet }
   }
 }
