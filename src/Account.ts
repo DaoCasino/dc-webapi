@@ -1,16 +1,16 @@
-import { Logger } from "@daocasino/dc-logging"
+import { Logger } from '@daocasino/dc-logging'
 import { IConfig, config } from '@daocasino/dc-configs'
-import { Eth, LastBalances, add0x } from "@daocasino/dc-ethereum-utils"
-import { AccountInstance, InitAccountParams } from "./interfaces/IAccount"
+import { Eth, LastBalances, add0x } from '@daocasino/dc-ethereum-utils'
+import { AccountInstance, InitAccountParams } from './interfaces/IAccount'
 import { ActionData } from './interfaces/IDCWebapi'
 
-const log = new Logger("Account:")
+const log = new Logger('Account:')
 
 export default class Account implements AccountInstance {
   private _params: InitAccountParams
   private _configuration: IConfig
   private _address: string
-  
+
   /** Actions events */
   public LOADED_ACTION: string = 'DC_ACCOUNT_INSTANCE_LOADED'
   public GET_ACCOUNT_INFO: string = 'DC_ACCOUNT_INFO'
@@ -42,7 +42,7 @@ export default class Account implements AccountInstance {
       if (
         privateKey &&
         privateKey.length === 66 &&
-        privateKey.substr(0, 2) === "0x"
+        privateKey.substr(0, 2) === '0x'
       ) {
         /** Create account */
         localStorage.removeItem(walletName)
@@ -77,7 +77,7 @@ export default class Account implements AccountInstance {
      * if exist not then throw error
      */
     if (!walletPassword) {
-      throw new Error("walletPassword in not defined")
+      throw new Error('walletPassword in not defined')
     }
 
     /**
@@ -85,8 +85,8 @@ export default class Account implements AccountInstance {
      * if private key not exist then
      * throw error
      */
-    if (typeof privateKeytoCreate === "undefined") {
-      throw new Error("privateKey is not define")
+    if (typeof privateKeytoCreate === 'undefined') {
+      throw new Error('privateKey is not define')
     }
 
     /** Init account in Eth instance */
@@ -111,7 +111,7 @@ export default class Account implements AccountInstance {
      * If localstorage wallet not exist
      * then return local address
      */
-    if (typeof this._address !== "undefined") {
+    if (typeof this._address !== 'undefined') {
       return this._address
     }
     /**
@@ -135,10 +135,10 @@ export default class Account implements AccountInstance {
      * not exist wallet with name
      * throw new Error
      */
-    if (typeof localStorage === "undefined") {
+    if (typeof localStorage === 'undefined') {
       return this._params.ETH.getWalletAccount().privateKey
     }
-    
+
     if (!localStorage.getItem(this._configuration.walletName)) {
       throw new Error(`
         Not wallet with name: ${this._configuration.walletName}

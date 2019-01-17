@@ -1,6 +1,6 @@
 import {
-  ActionData,
-} from "./IDCWebapi"
+  ActionData
+} from './IDCWebapi'
 import { EventEmitter } from 'events'
 
 export interface ApiEventsParams {
