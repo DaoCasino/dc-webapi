@@ -1,4 +1,4 @@
-import { IGame, CreateGameParams } from "./IGame"
+import { IGame, CreateGameParams } from './IGame'
 import { AccountInstance } from './IAccount'
 
 export interface ActionData {
@@ -10,6 +10,7 @@ export interface ReadyInstnce {
   game: IGame,
   account: AccountInstance
 }
+
 export interface WebapiInstance {
   on: (
     eventName: string,

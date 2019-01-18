@@ -3,7 +3,7 @@ import { checkEnviroment } from '@daocasino/dc-events'
 import { LastBalances, SolidityTypeValue } from "@daocasino/dc-blockchain-types"
 import { AccountInstance, InitAccountParams } from "./interfaces/IAccount"
 
-const log = new Logger("Account:")
+const log = new Logger('Account:')
 
 export default class Account implements AccountInstance {
   private _params: InitAccountParams

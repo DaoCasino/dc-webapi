@@ -13,7 +13,7 @@ import {
   PlayParams,
   ConnectParams,
   IDAppPlayerInstance
-} from "@daocasino/dc-core"
+} from '@daocasino/dc-core'
 import {
   IGame,
   PlayResult,
@@ -92,12 +92,12 @@ export default class Game implements IGame {
     }
 
     this.DApp = new DApp(dappParams)
-    this.DApp.on("dapp::status", data => {
-      self.params.eventEmitter.emit("webapi::status", data)
+    this.DApp.on('dapp::status', data => {
+      self.params.eventEmitter.emit('webapi::status', data)
     })
     log.info(`DApp ${createGameParams.name} created!`)
   }
-  
+
   async connect(params: ConnectParams): Promise<ConnectResult> {
     try {
       const address = await this.params.eventEmitter.request({ eventName: 'getAddress' })
