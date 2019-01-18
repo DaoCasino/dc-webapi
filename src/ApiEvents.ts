@@ -1,16 +1,16 @@
 import { Logger } from '@daocasino/dc-logging'
 import { EventEmitter } from 'events'
-import { setDefaultConfig } from "@daocasino/dc-configs"
+import { setDefaultConfig } from '@daocasino/dc-configs'
 
 import {
   ActionData,
   ApiEventsParams,
   ApiEventsInstance
-} from "./interfaces"
+} from './interfaces'
 
 const log = new Logger('BrowserEvents:')
 
-export default class ApiEvents extends EventEmitter implements ApiEventsInstance {  
+export default class ApiEvents extends EventEmitter implements ApiEventsInstance {
   private params: ApiEventsParams
 
   constructor(params: ApiEventsParams) {
@@ -28,7 +28,7 @@ export default class ApiEvents extends EventEmitter implements ApiEventsInstance
     }
   }
 
-  eventNames () {
+  eventNames() {
     return [
       'ready',
       'listenAll',

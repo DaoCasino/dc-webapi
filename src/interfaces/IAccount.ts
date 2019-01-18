@@ -1,6 +1,6 @@
 import { ActionData } from './IDCWebapi'
-import { IConfig } from "@daocasino/dc-configs"
-import { LastBalances, Eth } from "@daocasino/dc-ethereum-utils"
+import { IConfig } from '@daocasino/dc-configs'
+import { LastBalances, Eth } from '@daocasino/dc-ethereum-utils'
 import { ApiEventsInstance } from './IApiEvents'
 
 export interface InitAccountParams {

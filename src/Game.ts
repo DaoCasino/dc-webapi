@@ -5,21 +5,22 @@ import {
   PlayParams,
   ConnectParams,
   IDAppPlayerInstance
-} from "@daocasino/dc-core"
+} from '@daocasino/dc-core'
 import {
   IGame,
   PlayResult,
   ConnectResult,
   DisconnectResult,
   CreateGameParams,
-  InitGameInstanceParams,
-} from "./interfaces/IGame"
-import { Logger } from "@daocasino/dc-logging"
-import { IConfig, config } from "@daocasino/dc-configs"
-import { dec2bet, ETHInstance } from "@daocasino/dc-ethereum-utils"
-import { TransportProviderFactory, IMessagingProvider } from "@daocasino/dc-messaging"
-import fetch from "cross-fetch"
-const log = new Logger("Game:")
+  InitGameInstanceParams
+} from './interfaces/IGame'
+import { Logger } from '@daocasino/dc-logging'
+import { IConfig, config } from '@daocasino/dc-configs'
+import { dec2bet, ETHInstance } from '@daocasino/dc-ethereum-utils'
+import { TransportProviderFactory, IMessagingProvider } from '@daocasino/dc-messaging'
+import fetch from 'cross-fetch'
+
+const log = new Logger('Game:')
 
 export default class Game implements IGame {
   private ETH: ETHInstance
@@ -51,14 +52,14 @@ export default class Game implements IGame {
    */
   private getChannelStatus(channelState: string): string {
     switch (channelState) {
-      case "0":
-        return "unused"
-      case "1":
-        return "opened"
-      case "2":
-        return "closed"
-      case "3":
-        return "dispute"
+      case '0':
+        return 'unused'
+      case '1':
+        return 'opened'
+      case '2':
+        return 'closed'
+      case '3':
+        return 'dispute'
       default:
         throw new Error(`unknown channel state: ${channelState}`)
     }
@@ -82,15 +83,15 @@ export default class Game implements IGame {
     let { gameContractAddress } = createGameParams
 
     if (
-      blockchainNetwork === "local" &&
-      gameContractAddress.indexOf("->") > -1
+      blockchainNetwork === 'local' &&
+      gameContractAddress.indexOf('->') > -1
     ) {
       const { web3HttpProviderUrl } = config.default
       gameContractAddress = await fetch(
-        `${web3HttpProviderUrl}/${gameContractAddress.split("->")[0]}`
+        `${web3HttpProviderUrl}/${gameContractAddress.split('->')[0]}`
       )
         .then(result => result.json())
-        .then(result => result[gameContractAddress.split("->")[1]])
+        .then(result => result[gameContractAddress.split('->')[1]])
     }
 
     const dappParams: DAppParams = {
@@ -105,16 +106,16 @@ export default class Game implements IGame {
     }
 
     this.DApp = new DApp(dappParams)
-    this.DApp.on("dapp::status", data => {
-      self.params.eventEmitter.emit("webapi::status", data)
+    this.DApp.on('dapp::status', data => {
+      self.params.eventEmitter.emit('webapi::status', data)
     })
     log.info(`DApp ${createGameParams.name} created!`)
   }
-  
+
   async connect(params: ConnectParams): Promise<ConnectResult> {
-    if (typeof this.ETH.getAccount().address === "undefined") {
+    if (typeof this.ETH.getAccount().address === 'undefined') {
       throw new Error(
-        "Account is not defined please create new account and start game again"
+        'Account is not defined please create new account and start game again'
       )
     }
 
@@ -122,21 +123,21 @@ export default class Game implements IGame {
     const { playerDeposit } = params
     if (userBalance.bet.balance < playerDeposit) {
       throw new Error(
-        "Insufficient BET funds on your account. Try to set up a lower deposit."
+        'Insufficient BET funds on your account. Try to set up a lower deposit.'
       )
     }
 
     const self = this
     this.GameInstance = await this.DApp.startClient()
-    this.GameInstance.on("instance::status", data => {
-      self.params.eventEmitter.emit("webapi::status", {
-        message: "event from instance",
+    this.GameInstance.on('instance::status', data => {
+      self.params.eventEmitter.emit('webapi::status', {
+        message: 'event from instance',
         data
       })
     })
-    
-    this.params.eventEmitter.emit("webapi::status", {
-      message: "client try to connect",
+
+    this.params.eventEmitter.emit('webapi::status', {
+      message: 'client try to connect',
       data: {}
     })
 
@@ -144,9 +145,9 @@ export default class Game implements IGame {
     const gameConnect = await this.GameInstance.connect({ playerDeposit })
 
     /** Check channel state */
-    if (this.getChannelStatus(gameConnect.state) === "opened") {
-      this.params.eventEmitter.emit("connectionResult", {
-        message: "connect to bankroller succefull"
+    if (this.getChannelStatus(gameConnect.state) === 'opened') {
+      this.params.eventEmitter.emit('connectionResult', {
+        message: 'connect to bankroller succefull'
       })
       log.info(`Channel  ${gameConnect.channelId} opened! Go to game!`)
       /** Generate and return data for connected results */
@@ -179,17 +180,17 @@ export default class Game implements IGame {
     } = this.GameInstance.getChannelStateData().balance
 
     /** Generate results and return */
-    // TODO return all from callPlayResults
+      // TODO return all from callPlayResults
     const playResult: PlayResult = {
-      params,
-      profit: callPlayResults.profit,
-      balances: {
-        player: dec2bet(player),
-        bankroller: dec2bet(bankroller)
-      },
-      data: callPlayResults.data,
-      randomNums: callPlayResults.randoms
-    }
+        params,
+        profit: callPlayResults.profit,
+        balances: {
+          player: dec2bet(player),
+          bankroller: dec2bet(bankroller)
+        },
+        data: callPlayResults.data,
+        randomNums: callPlayResults.randoms
+      }
 
     return playResult
   }
@@ -199,7 +200,7 @@ export default class Game implements IGame {
     const gameDisconnect = await this.GameInstance.disconnect()
 
     /** Check channel state */
-    if (this.getChannelStatus(gameDisconnect.state) === "closed") {
+    if (this.getChannelStatus(gameDisconnect.state) === 'closed') {
       log.info(`Channel ${gameDisconnect._id} closed and Game Over`)
       /** Generate and return data for connected results */
       return {
