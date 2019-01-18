@@ -59,26 +59,25 @@ export default class DCWebapi implements WebapiInstance {
     switch (true) {
       case isIframe:
         const params = await this.ApiEvents.request({ eventName: 'getParams' })
-        setDefaultConfig(params)
+        setDefaultConfig({ ...params })
         break        
       case (typeof this.initParams === 'undefined'):
         throw new Error('initParams is not define')
       default:
-        setDefaultConfig(this.initParams)
+        setDefaultConfig({ ...this.initParams })
     }
 
     const {
       blockchainType,
       blockchainNetwork,
       platformId,
-      customWeb3HttpProviderUrl
-    } = this.initParams
+    } = config.default
     
+    console.log(config.default)
     this.wallet = await walletFactory({
       blockchainType,
       blockchainNetwork,
-      platformId,
-      customWeb3HttpProviderUrl
+      platformId
     })
     
     if (this.gameEnv === 'development') {
@@ -104,7 +103,7 @@ export default class DCWebapi implements WebapiInstance {
   }
 
   private async webapiStart(): Promise<void> {
-    const { privateKey } = this.initParams
+    const { privateKey } = config.default
     this.ETH = this.wallet.configuration.blockchainUtils
     this.account = new Account({
       wallet: this.wallet,
