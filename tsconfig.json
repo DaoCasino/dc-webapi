@@ -3,14 +3,20 @@
   "compilerOptions": {
     "composite": true,
     "rootDir": "src",
-    "outDir": "lib"
+    "outDir": "lib",
+    "lib": [
+      "es6"
+    ]
   },
   "include": ["src/**/*"],
   "references": [
     { "path": "../dc-core" },
+    { "path": "../dc-wallet" },
     { "path": "../dc-messaging" },
+    { "path": "../dc-wallet" },
     { "path": "../dc-ethereum-utils" },
     { "path": "../dc-logging" },
-    { "path": "../dc-configs" }
+    { "path": "../dc-configs" },
+    { "path": "../dc-blockchain-types" }
   ]
 }

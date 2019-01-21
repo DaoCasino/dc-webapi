@@ -1,19 +1,17 @@
-import { ActionData } from './IDCWebapi'
-import { IConfig } from '@daocasino/dc-configs'
-import { LastBalances, Eth } from '@daocasino/dc-ethereum-utils'
-import { ApiEventsInstance } from './IApiEvents'
+import { IConfig } from "@daocasino/dc-configs"
+import { EventsInstance } from '@daocasino/dc-events'
+import { WalletInstance } from '@daocasino/dc-wallet'
+import { LastBalances } from "@daocasino/dc-blockchain-types"
 
 export interface InitAccountParams {
-  ETH: Eth
+  wallet: WalletInstance
   config: IConfig,
-  eventEmitter: ApiEventsInstance
+  eventEmitter: EventsInstance
 }
 
 export interface AccountInstance {
-  init: (walletPassword: string, privateKeytoCreate?: string) => void
-  initAccountInIframe: (data: ActionData) => void
+  init: (privateKeytoCreate?: string) => Promise<string> 
   getAddress: () => string
-  getEthInstance: () => Eth
+  playerSign: (data: any) => Promise<string>
   getBalances: (address?: string) => Promise<LastBalances>
-  exportPrivateKey: (walletPassword: string) => string
 }

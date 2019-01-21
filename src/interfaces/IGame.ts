@@ -1,7 +1,8 @@
-import { IConfig } from '@daocasino/dc-configs'
-import { ETHInstance } from '@daocasino/dc-ethereum-utils'
-import { ApiEventsInstance } from './IApiEvents'
-import { PlayParams, IGameLogic, ConnectParams } from '@daocasino/dc-core'
+import { IConfig } from "@daocasino/dc-configs"
+import { EventsInstance } from '@daocasino/dc-events'
+import { WalletInstance } from '@daocasino/dc-wallet'
+import { BlockchainUtilsInstance, SolidityTypeValue } from "@daocasino/dc-blockchain-types"
+import { PlayParams, IGameLogic, ConnectParams } from "@daocasino/dc-core"
 
 export interface CreateGameParams {
   name: string
@@ -11,9 +12,12 @@ export interface CreateGameParams {
 }
 
 export interface InitGameInstanceParams {
-  Eth: ETHInstance
+  Eth: BlockchainUtilsInstance
+  playerAddress: string
+  playerSign: (data: SolidityTypeValue[]) => Promise<string>
   config: IConfig
-  eventEmitter: ApiEventsInstance
+  wallet?: WalletInstance
+  eventEmitter: EventsInstance
 }
 
 interface GameBalances {

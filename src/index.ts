@@ -1,26 +1,28 @@
-import Game from './Game'
-import Account from './Account'
-import ApiEvents from './ApiEvents'
+
+import Game from "./Game"
+import Account from "./Account"
 import {
   IGame,
   ReadyInstnce,
   WebapiInstance,
-  AccountInstance,
-  ApiEventsInstance
-} from './interfaces'
-import { Eth } from '@daocasino/dc-ethereum-utils'
+  AccountInstance
+} from "./interfaces"
+import { devTools } from './DevTools'
+import { BlockchainUtilsInstance } from '@daocasino/dc-blockchain-types'
+import Events, { EventsInstance, checkEnviroment } from '@daocasino/dc-events'
+import walletFactory, { WalletInstance } from '@daocasino/dc-wallet'
 import { Logger } from '@daocasino/dc-logging'
 import { config, setDefaultConfig, IConfigOptions } from '@daocasino/dc-configs'
 
 const log = new Logger('WebAPI:')
 
 export default class DCWebapi implements WebapiInstance {
-  private ETH: Eth
+  private ETH: BlockchainUtilsInstance
+  private wallet: WalletInstance
+  private gameEnv: string
+  private ApiEvents: EventsInstance
   private initParams: IConfigOptions
-  private ApiEvents: ApiEventsInstance
 
-  public isIframe: boolean
-  public isBrowser: boolean
   public account: AccountInstance
   public game: IGame
 
@@ -28,14 +30,9 @@ export default class DCWebapi implements WebapiInstance {
     initParams?: IConfigOptions,
     callback?: (instance: DCWebapi) => void
   ) {
+    this.gameEnv = process.env.DC_GAME_ENV
     this.initParams = initParams
-    this.isBrowser = (typeof window !== 'undefined')
-    this.isIframe = (this.isBrowser && window.self !== window.top)
-
-    this.ApiEvents = new ApiEvents({
-      isBrowser: this.isBrowser,
-      isIframe: this.isIframe
-    })
+    this.ApiEvents = new Events
 
     if (callback) {
       this.on('ready', callback)
@@ -57,17 +54,37 @@ export default class DCWebapi implements WebapiInstance {
     }
   }
 
-  private configurateParams() {
-    this.on('paramsReady', async () => {
-      await this.webapiStart()
-    })
-
-    if (!this.isIframe && typeof this.initParams !== 'undefined') {
-      setDefaultConfig(this.initParams)
-      this.ApiEvents.emit('paramsReady', null)
-    } else {
-      this.ApiEvents.crossEmit('getParams', null)
+  private async configurateParams(): Promise<void> {
+    const { isIframe } = checkEnviroment()
+    switch (true) {
+      case isIframe:
+        const params = await this.ApiEvents.request({ eventName: 'getParams' })
+        setDefaultConfig({ ...params })
+        break        
+      case (typeof this.initParams === 'undefined'):
+        throw new Error('initParams is not define')
+      default:
+        setDefaultConfig({ ...this.initParams })
     }
+
+    const {
+      blockchainType,
+      blockchainNetwork,
+      platformId,
+    } = config.default
+    
+    console.log(config.default)
+    this.wallet = await walletFactory({
+      blockchainType,
+      blockchainNetwork,
+      platformId
+    })
+    
+    if (this.gameEnv === 'development') {
+      devTools(this.wallet, this.ApiEvents)
+    }
+    
+    await this.webapiStart()
   }
 
   init(): Promise<ReadyInstnce> {
@@ -86,37 +103,24 @@ export default class DCWebapi implements WebapiInstance {
   }
 
   private async webapiStart(): Promise<void> {
-    const {
-      walletName,
-      gasPrice: price,
-      gasLimit: limit,
-      web3HttpProviderUrl: httpProviderUrl,
-      contracts
-    } = config.default
-
-    this.ETH = new Eth({
-      walletName,
-      httpProviderUrl,
-      gasParams: { price, limit },
-      ERC20ContractInfo: contracts.ERC20
-    })
-
+    const { privateKey } = config.default
+    this.ETH = this.wallet.configuration.blockchainUtils
     this.account = new Account({
-      ETH: this.ETH,
+      wallet: this.wallet,
       config: config.default,
       eventEmitter: this.ApiEvents
     })
+
+    const playerAddress = await this.account.init(privateKey)
 
     this.game = new Game({
       Eth: this.ETH,
+      playerAddress,
+      playerSign: this.account.playerSign.bind(this.account),
       config: config.default,
+      wallet: this.wallet,
       eventEmitter: this.ApiEvents
     })
-
-    this.account.init(
-      config.default.standartWalletPass,
-      config.default.privateKey
-    )
 
     this.ApiEvents.emit('ready', this)
   }
